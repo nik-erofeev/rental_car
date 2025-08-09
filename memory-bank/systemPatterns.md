@@ -39,6 +39,8 @@
 - Централизованные исключения определены в `app/api/exceptions.py` и используются в сервисах.
   - Cars: `CarNotFoundException` (404), `CarAlreadyExistsException` (409).
   - Orders: `OrderNotFoundException` (404), `OrderCarNotFoundException` (404).
+  - Payments: `PaymentNotFoundException`, `OrderNotFoundForPaymentException` в `app/api/payments/exceptions.py`.
+  - Deliveries: `DeliveryNotFoundException`, `OrderNotFoundForDeliveryException` в `app/api/deliveries/exceptions.py`.
 - В сервисах не бросаем `ValueError`; вместо этого поднимаем готовые `HTTPException` из `app.api.exceptions`.
 - Перед созданием зависимых сущностей проверяем наличие FK-объектов (например, `car_id` для `orders`). При отсутствии — 404.
 - Для полей с идентификаторами в схемах указывать ограничения: `gt=0` для `car_id`, `user_id` (если не `None`).

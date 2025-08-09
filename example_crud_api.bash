@@ -95,3 +95,55 @@ curl -X PUT "http://localhost:8000/v1/orders/1" \
 # - Для orders: car_id > 0 и должен существовать; при неверном car_id вернётся 404.
 # - customer_phone должен быть в формате +7XXXXXXXXXX.
 # - delivery_date можно передавать с таймзоной (Z/±hh:mm) — внутри нормализуется.
+
+
+# PAYMENTS
+# Создать
+curl -X POST "http://localhost:8000/v1/payments/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "order_id": 1,
+    "amount": 15000.00,
+    "status": "paid",
+    "payment_type": "full",
+    "transaction_id": "TXN-DEMO-1"
+  }'
+
+# Получить по ID
+curl "http://localhost:8000/v1/payments/1"
+
+# Список
+curl "http://localhost:8000/v1/payments/?limit=10&offset=0"
+
+# Обновить
+curl -X PUT "http://localhost:8000/v1/payments/1" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"pending","payment_type":"installment"}'
+
+# Удалить
+# curl -X DELETE "http://localhost:8000/v1/payments/1"
+
+
+# DELIVERIES
+# Создать
+curl -X POST "http://localhost:8000/v1/deliveries/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "order_id": 1,
+    "status": "in_progress",
+    "tracking_number": "TRK-DEMO-1"
+  }'
+
+# Получить по ID
+curl "http://localhost:8000/v1/deliveries/1"
+
+# Список
+curl "http://localhost:8000/v1/deliveries/?limit=10&offset=0"
+
+# Обновить
+curl -X PUT "http://localhost:8000/v1/deliveries/1" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"delivered","tracking_number":"TRK-DEMO-1"}'
+
+# Удалить
+# curl -X DELETE "http://localhost:8000/v1/deliveries/1"

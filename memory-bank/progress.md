@@ -17,6 +17,7 @@
 - Перед созданием заказов проверяется наличие `car_id` (404, если не найдено).
 - Для e2e-проверки добавлен скрипт `example_crud_api.bash`; удаление `cars/1` оставлено закомментированным, чтобы не ломать примеры с заказами.
  - Из входных данных `orders` исключён `delivery_date` (формируется на сервере); примеры в `example_crud_api.bash` обновлены.
+ - Добавлены примеры для `payments` и `deliveries` в `example_crud_api.bash` (create/get/list/update/delete).
 
 ## Миграции
 - Создана ревизия Alembic: `31a91ebf82a8_add_domain_models_cars_car_photos_.py`
