@@ -1,4 +1,4 @@
-"""Описание изменений
+"""add cares table
 
 Revision ID: 15d90e69db64
 Revises: 
@@ -28,11 +28,11 @@ def upgrade() -> None:
     sa.Column('year', sa.Integer(), nullable=False),
     sa.Column('mileage', sa.Integer(), nullable=False),
     sa.Column('price', sa.Numeric(precision=12, scale=2), nullable=False),
-    sa.Column('condition', sa.Enum('new', 'used', name='car_condition'), nullable=False),
+    sa.Column('condition', sa.Enum('new', 'used', name='car_condition', create_type=False), nullable=False),
     sa.Column('color', sa.String(length=64), nullable=False),
-    sa.Column('engine_type', sa.Enum('gasoline', 'diesel', 'hybrid', 'electric', name='engine_type'), nullable=False),
-    sa.Column('transmission', sa.Enum('manual', 'automatic', 'cvt', name='transmission'), nullable=False),
-    sa.Column('status', sa.Enum('available', 'reserved', 'sold', name='car_status'), nullable=False),
+    sa.Column('engine_type', sa.Enum('gasoline', 'diesel', 'hybrid', 'electric', name='engine_type', create_type=False), nullable=False),
+    sa.Column('transmission', sa.Enum('manual', 'automatic', 'cvt', name='transmission', create_type=False), nullable=False),
+    sa.Column('status', sa.Enum('available', 'reserved', 'sold', name='car_status', create_type=False), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('updated_at', sa.TIMESTAMP(), server_default=sa.text('now()'), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -59,3 +59,9 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_cars_vin'), table_name='cars')
     op.drop_table('cars')
     # ### end Alembic commands ###
+
+    # todo: для ENUM руками-алембик не удаляет
+    op.execute("DROP TYPE IF EXISTS car_condition CASCADE;")
+    op.execute("DROP TYPE IF EXISTS engine_type CASCADE;")
+    op.execute("DROP TYPE IF EXISTS transmission CASCADE;")
+    op.execute("DROP TYPE IF EXISTS car_status CASCADE;")

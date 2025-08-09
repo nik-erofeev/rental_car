@@ -10,6 +10,23 @@
 - Правило проекта: явно задаём `__tablename__` в каждой модели.
 - Для Alembic все модели импортируются в `app/models/__init__.py` (autogenerate видит изменения).
 
+### ENUM в PostgreSQL
+- В моделях использовать ENUM с явным именем типа и отключённым автосозданием типа:
+  - Вариант с диалектом PG:
+    ```python
+    from sqlalchemy.dialects.postgresql import ENUM as PGEnum
+    role: Mapped[UserRole] = mapped_column(PGEnum('customer', 'manager', 'admin', name='user_role', create_type=False))
+    ```
+  - Либо через `sqlalchemy.Enum(..., name='user_role')` при условии, что тип уже существует в БД и автосоздание отключено.
+- В миграциях при добавлении/удалении колонок с ENUM тип не создаём автоматически (политика: `create_type=False`).
+  - Типы создаются отдельно (в первичных миграциях) или руками при необходимости через `op.execute("CREATE TYPE ... AS ENUM (...)")`.
+  - В `downgrade()` при удалении последних использований типа — руками удаляем тип:
+    ```python
+    # todo: для ENUM руками — alembic не удаляет
+    op.execute("DROP TYPE IF EXISTS user_role CASCADE;")
+    ```
+- Если ENUM используется в нескольких таблицах, тип удаляем только тогда, когда он больше нигде не используется (как правило, в последней ревизии цепочки изменений).
+
 ## Pydantic v2
 - Схемы чтения используют `model_config = {from_attributes=True}` для валидации ORM-объектов.
 

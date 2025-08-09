@@ -14,3 +14,8 @@
 
 ## Миграции
 - Alembic: `env.py` подставляет `DB_URL`, `target_metadata = app.models.Base.metadata`.
+ - Рекомендуется вызывать Alembic через бинарь виртуального окружения (без `activate`), используя абсолютные пути:
+   ```bash
+   /Users/Nik/Desktop/my_test_project/rental_car/.venv/bin/alembic revision --autogenerate -m "Описание изменений"
+   /Users/Nik/Desktop/my_test_project/rental_car/.venv/bin/alembic upgrade head
+   ```

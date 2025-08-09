@@ -1,5 +1,9 @@
 from typing import TYPE_CHECKING
-from sqlalchemy import String
+from datetime import datetime
+from enum import StrEnum, unique
+
+from sqlalchemy import String, TIMESTAMP, func
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -13,6 +17,13 @@ if TYPE_CHECKING:
     from .reviews import Review
 
 
+@unique
+class UserRole(StrEnum):
+    customer = "customer"
+    manager = "manager"
+    admin = "admin"
+
+
 class User(Base):
     __tablename__: str = "users"  # type: ignore[assignment]
     email: Mapped[str] = mapped_column(
@@ -24,6 +35,21 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(
         nullable=False,
         default=True,
+    )
+    full_name: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    phone: Mapped[str | None] = mapped_column(String(32), nullable=True)
+
+    role: Mapped[UserRole] = mapped_column(
+        # SQLEnum(UserRole, name="user_role", native_enum=False),
+        SQLEnum(UserRole, name="user_role"),
+        nullable=False,
+        default=UserRole.customer,
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP,
+        server_default=func.now(),
+        onupdate=func.now(),
     )
 
     # relations
