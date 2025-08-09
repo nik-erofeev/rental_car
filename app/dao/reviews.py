@@ -77,7 +77,7 @@ class ReviewsDAO(BaseDAO[Review]):
                 or_(
                     cls.model.customer_name.ilike(pattern),
                     cls.model.comment.ilike(pattern),
-                )
+                ),
             )
 
         query = select(cls.model)

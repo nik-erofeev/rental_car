@@ -46,9 +46,24 @@
     схема `CarReportDetailsRead` (`CarReportCarRead`), роут `GET /v1/car-reports/{report_id}/details`.
   - Обновлён `example_crud_api.bash` curl-примерами для новых ручек.
 
+- Расширены фильтры списков и обработка пустых результатов; описания/примеры параметров добавлены в summary/description роутеров:
+  - Reviews: фильтры `user_id`, `car_id`, `rating_min`, `rating_max`, `q` (ILIKE по имени/комменту);
+    при пустом результате — `ReviewsNotFoundByFiltersException` (404).
+  - Orders: фильтры `user_id`, `car_id`, `status`, `payment_method`, `q` (по имени/почте/телефону);
+    при пустом результате — `OrdersNotFoundByFiltersException` (404).
+  - Payments: фильтры `order_id`, `status`, `payment_type`;
+    при пустом результате — `PaymentsNotFoundByFiltersException` (404).
+  - Deliveries: фильтры `order_id`, `status`, `q` (ILIKE по `tracking_number`);
+    при пустом результате — `DeliveriesNotFoundByFiltersException` (404).
+  - Обновлены DAO (`find_filtered`), сервисы и роуты для указанных сущностей.
+
+- Исправлены 500 при невалидных enum-фильтрах (cars.status/engine_type, orders.status/payment_method,
+  payments.status/payment_type, deliveries.status): добавлена валидация на уровне роутеров с использованием
+  Enum-типов из моделей. Теперь при неверном значении возвращается 422 Unprocessable Entity вместо ошибок БД.
+
 ## Фокус сейчас
  - добавить логирование на каждую ручку post, get, delete
- - Глубокие фильтры по поиску в рейтингом
+ - дополнить `example_crud_api.bash` curl-примерами использования фильтров для orders/payments/deliveries/reviews
 
 ## Далее
  - Интеграционные тесты для `users`, `cars`, `orders` и smoke для

@@ -18,6 +18,7 @@ from app.dao.orders import OrdersDAO
 from app.api.payments.exceptions import (
     PaymentNotFoundException,
     OrderNotFoundForPaymentException,
+    PaymentsNotFoundByFiltersException,
 )
 
 
@@ -49,14 +50,20 @@ async def list_payments(
     session: AsyncSession,
     limit: int = 20,
     offset: int = 0,
+    order_id: int | None = None,
+    status: str | None = None,
+    payment_type: str | None = None,
 ) -> list[PaymentRead]:
-    page = offset // limit + 1 if limit else 1
-    items = await PaymentsDAO.paginate(
+    items = await PaymentsDAO.find_filtered(
         session,
-        page=page,
-        page_size=limit,
-        filters=None,
+        order_id=order_id,
+        status=status,
+        payment_type=payment_type,
+        limit=limit,
+        offset=offset,
     )
+    if not items:
+        raise PaymentsNotFoundByFiltersException
     return [PaymentRead.model_validate(i) for i in items]
 
 

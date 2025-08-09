@@ -9,3 +9,8 @@ CarAlreadyExistsException = HTTPException(
     status_code=status.HTTP_409_CONFLICT,
     detail="Авто с таким VIN уже существует",
 )
+
+CarsNotFoundByFiltersException = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="По заданным фильтрам авто не найдены",
+)

@@ -17,6 +17,7 @@ from app.api.deliveries.services import (
     delete_delivery,
     get_delivery_details,
 )
+from app.models.deliveries import DeliveryStatus
 
 
 router = APIRouter(
@@ -54,13 +55,29 @@ async def get(
     "/",
     response_model=list[DeliveryRead],
     response_class=ORJSONResponse,
+    summary="Список доставок с фильтрами",
+    description=(
+        "Фильтры: order_id,\n"
+        "status {pending|in_progress|delivered|failed},\n"
+        "q (по tracking_number)"
+    ),
 )
 async def list_(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    order_id: int | None = None,
+    status: DeliveryStatus | None = None,
+    q: str | None = Query(default=None, min_length=1, max_length=128),
     session: AsyncSession = Depends(get_session_without_commit),
 ):
-    return await list_deliveries(session, limit, offset)
+    return await list_deliveries(
+        session=session,
+        limit=limit,
+        offset=offset,
+        order_id=order_id,
+        status=(status.value if status else None),
+        q=q,
+    )
 
 
 @router.get(

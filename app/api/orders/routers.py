@@ -18,6 +18,7 @@ from app.api.orders.services import (
     delete_order,
     get_order_details,
 )
+from app.models.orders import OrderStatus, PaymentMethod
 
 
 router = APIRouter(
@@ -55,13 +56,33 @@ async def get(
     "/",
     response_model=list[OrderRead],
     response_class=ORJSONResponse,
+    summary="Список заказов с фильтрами",
+    description=(
+        "Фильтры: user_id, car_id,\n"
+        "status {pending|paid|processing|in_delivery|completed|canceled},\n"
+        "payment_method {cash|card|loan|lease}, q (по имени/почте/телефону)"
+    ),
 )
 async def list_(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    user_id: int | None = None,
+    car_id: int | None = None,
+    status: OrderStatus | None = None,
+    payment_method: PaymentMethod | None = None,
+    q: str | None = Query(default=None, min_length=1, max_length=128),
     session: AsyncSession = Depends(get_session_without_commit),
 ):
-    return await list_orders(session, limit, offset)
+    return await list_orders(
+        session=session,
+        limit=limit,
+        offset=offset,
+        user_id=user_id,
+        car_id=car_id,
+        status=(status.value if status else None),
+        payment_method=(payment_method.value if payment_method else None),
+        q=q,
+    )
 
 
 @router.put(

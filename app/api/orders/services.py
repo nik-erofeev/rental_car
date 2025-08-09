@@ -15,6 +15,7 @@ from app.api.orders.schemas import (
 )
 from app.dao.orders import OrdersDAO
 from app.dao.cars import CarsDAO
+from app.api.orders.exceptions import OrdersNotFoundByFiltersException
 
 
 logger = logging.getLogger(__name__)
@@ -43,14 +44,24 @@ async def list_orders(
     session: AsyncSession,
     limit: int = 20,
     offset: int = 0,
+    user_id: int | None = None,
+    car_id: int | None = None,
+    status: str | None = None,
+    payment_method: str | None = None,
+    q: str | None = None,
 ) -> list[OrderRead]:
-    page = offset // limit + 1 if limit else 1
-    orders = await OrdersDAO.paginate(
+    orders = await OrdersDAO.find_filtered(
         session,
-        page=page,
-        page_size=limit,
-        filters=None,
+        user_id=user_id,
+        car_id=car_id,
+        status=status,
+        payment_method=payment_method,
+        q=q,
+        limit=limit,
+        offset=offset,
     )
+    if not orders:
+        raise OrdersNotFoundByFiltersException
     return [OrderRead.model_validate(o) for o in orders]
 
 

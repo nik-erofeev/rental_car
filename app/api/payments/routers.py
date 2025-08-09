@@ -18,6 +18,7 @@ from app.api.payments.services import (
     delete_payment,
     get_payment_details,
 )
+from app.models.payments import PaymentStatus, PaymentType
 
 
 router = APIRouter(
@@ -55,13 +56,29 @@ async def get(
     "/",
     response_model=list[PaymentRead],
     response_class=ORJSONResponse,
+    summary="Список платежей с фильтрами",
+    description=(
+        "Фильтры: order_id,\n"
+        "status {pending|paid|failed},\n"
+        "payment_type {full|installment|deposit}"
+    ),
 )
 async def list_(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    order_id: int | None = None,
+    status: PaymentStatus | None = None,
+    payment_type: PaymentType | None = None,
     session: AsyncSession = Depends(get_session_without_commit),
 ):
-    return await list_payments(session, limit, offset)
+    return await list_payments(
+        session=session,
+        limit=limit,
+        offset=offset,
+        order_id=order_id,
+        status=(status.value if status else None),
+        payment_type=(payment_type.value if payment_type else None),
+    )
 
 
 @router.put(

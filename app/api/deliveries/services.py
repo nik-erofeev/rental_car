@@ -20,6 +20,7 @@ from app.api.deliveries.schemas import (
 from app.dao.deliveries import DeliveriesDAO
 from app.dao.orders import OrdersDAO
 from app.models.users import User
+from app.api.deliveries.exceptions import DeliveriesNotFoundByFiltersException
 
 
 logger = logging.getLogger(__name__)
@@ -51,14 +52,20 @@ async def list_deliveries(
     session: AsyncSession,
     limit: int = 20,
     offset: int = 0,
+    order_id: int | None = None,
+    status: str | None = None,
+    q: str | None = None,
 ) -> list[DeliveryRead]:
-    page = offset // limit + 1 if limit else 1
-    items = await DeliveriesDAO.paginate(
+    items = await DeliveriesDAO.find_filtered(
         session,
-        page=page,
-        page_size=limit,
-        filters=None,
+        order_id=order_id,
+        status=status,
+        q=q,
+        limit=limit,
+        offset=offset,
     )
+    if not items:
+        raise DeliveriesNotFoundByFiltersException
     return [DeliveryRead.model_validate(i) for i in items]
 
 

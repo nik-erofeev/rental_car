@@ -2,6 +2,7 @@ import logging
 from app.api.cars.exceptions import (
     CarNotFoundException,
     CarAlreadyExistsException,
+    CarsNotFoundByFiltersException,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -66,6 +67,8 @@ async def list_cars(
         limit=limit,
         offset=offset,
     )
+    if not cars:
+        raise CarsNotFoundByFiltersException
     return [CarRead.model_validate(c) for c in cars]
 
 

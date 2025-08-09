@@ -13,6 +13,7 @@ from app.api.cars.services import (
     delete_car,
     get_car_details,
 )
+from app.models.cars import CarStatus, EngineType
 
 
 router = APIRouter(
@@ -50,14 +51,21 @@ async def get(
     "/",
     response_model=list[CarRead],
     response_class=ORJSONResponse,
+    summary="Список авто с фильтрами",
+    description=(
+        "Фильтры: make, model, status {available|reserved|sold},\n"
+        "engine_type {gasoline|diesel|hybrid|electric}, price_[min|max],\n"
+        "year_[min|max], sort_by {price|year|created_at|updated_at},\n"
+        "sort_dir {asc|desc}"
+    ),
 )
 async def list_(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     make: str | None = None,
     model: str | None = None,
-    status: str | None = None,
-    engine_type: str | None = None,
+    status: CarStatus | None = None,
+    engine_type: EngineType | None = None,
     price_min: float | None = None,
     price_max: float | None = None,
     year_min: int | None = None,
@@ -75,8 +83,8 @@ async def list_(
         offset,
         make,
         model,
-        status,
-        engine_type,
+        (status.value if status else None),
+        (engine_type.value if engine_type else None),
         price_min,
         price_max,
         year_min,

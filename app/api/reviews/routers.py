@@ -50,6 +50,12 @@ async def get(
     "/",
     response_model=list[ReviewRead],
     response_class=ORJSONResponse,
+    summary="Список отзывов с фильтрами",
+    description=(
+        "Фильтры: user_id, car_id,\n"
+        "rating_min/rating_max (1-5),\n"
+        "q (по имени/комменту)"
+    ),
 )
 async def list_(
     limit: int = Query(20, ge=1, le=100),
