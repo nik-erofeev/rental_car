@@ -82,6 +82,9 @@ curl -X POST "http://localhost:8000/v1/orders/" \
 # Получить по ID
 curl "http://localhost:8000/v1/orders/1"
 
+# Детали (связанные сущности)
+curl "http://localhost:8000/v1/orders/1/details"
+
 # Список
 curl "http://localhost:8000/v1/orders/?limit=10&offset=0"
 

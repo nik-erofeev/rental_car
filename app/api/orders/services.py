@@ -10,6 +10,8 @@ from app.api.orders.schemas import (
     OrderRead,
     OrderUpdate,
     OrderIdFilter,
+    OrderDetailsRead,
+    OrderUserRead,
 )
 from app.dao.orders import OrdersDAO
 from app.dao.cars import CarsDAO
@@ -76,3 +78,33 @@ async def delete_order(session: AsyncSession, order_id: int) -> None:
     if deleted == 0:
         raise OrderNotFoundException
     await session.commit()
+
+
+async def get_order_details(
+    session: AsyncSession,
+    order_id: int,
+) -> OrderDetailsRead:
+    """Возвращает заказ и связанные сущности.
+
+    Включает: user, car, payments, deliveries.
+    """
+    order = await OrdersDAO.get_with_relations(session, order_id)
+    if not order:
+        raise OrderNotFoundException
+
+    # Импорты схем здесь, чтобы не создавать циклы на уровне модулей
+    from app.api.cars.schemas import CarRead  # noqa: WPS433
+    from app.api.payments.schemas import PaymentRead  # noqa: WPS433
+    from app.api.deliveries.schemas import DeliveryRead  # noqa: WPS433
+
+    return OrderDetailsRead(
+        order=OrderRead.model_validate(order),
+        user=(
+            None
+            if order.user is None
+            else OrderUserRead.model_validate(order.user)
+        ),
+        car=CarRead.model_validate(order.car),
+        payments=[PaymentRead.model_validate(p) for p in order.payments],
+        deliveries=[DeliveryRead.model_validate(d) for d in order.deliveries],
+    )

@@ -1,8 +1,13 @@
 from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel, Field, EmailStr, field_validator
 from pydantic.config import ConfigDict
 
 from app.models.orders import OrderStatus, PaymentMethod
+from app.api.cars.schemas import CarRead
+from app.api.payments.schemas import PaymentRead
+from app.api.deliveries.schemas import DeliveryRead
 
 
 class BaseOrder(BaseModel):
@@ -71,3 +76,27 @@ class OrderUpdate(BaseModel):
 
 class OrderIdFilter(BaseModel):
     id: int
+
+
+class OrderDetailsRead(BaseModel):
+    """Агрегированный ответ по заказу со связями."""
+
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+
+    order: OrderRead
+    # Локальная упрощённая схема пользователя, чтобы избежать циклического импорта
+    user: Optional["OrderUserRead"] = None
+    car: CarRead
+    payments: list[PaymentRead]
+    deliveries: list[DeliveryRead]
+
+
+class OrderUserRead(BaseModel):
+    """Упрощённое представление пользователя в деталях заказа."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: str
+    is_active: bool
+    created_at: datetime

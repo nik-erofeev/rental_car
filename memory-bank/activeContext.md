@@ -24,9 +24,14 @@
   - DAO: `UsersDAO.get_with_relations()` со `selectinload` для `orders.car`, `orders.payments`, `orders.deliveries`, `reviews`.
   - Сервис: `get_user_profile()` возвращает `user`, `orders`, `reviews`, `cars` (из `orders[].car`).
   - Роут: `GET /v1/users/{user_id}/profile` (+ curl пример в `example_crud_api.bash`).
+- Добавлена агрегированная ручка заказа:
+  - DAO: `OrdersDAO.get_with_relations()` со `selectinload` для `user`, `car`, `payments`, `deliveries`.
+  - Сервис: `get_order_details()`.
+  - Схема ответа: `OrderDetailsRead`.
+  - Роут: `GET /v1/orders/{order_id}/details` (+ curl пример в `example_crud_api.bash`).
 
 ## Фокус сейчас
- - Если актуально — добавить агрегированные ручки для сущностей, где есть связи (`relationship`), чтобы можно было получать связанные данные за один запрос (пример: `/orders/{id}/details`, `/cars/{id}/details`, и т.п.).
+ - Агрегированные ручки: реализовать `/v1/cars/{car_id}/details` (auto + photos + reports + reviews + orders) и добавить curl-пример.
  - Расширить фильтры/сортировку/пагинацию для `orders` (status, payment_method, диапазоны дат/сумм, сортировка по дате/сумме).
  - Написать минимальные интеграционные тесты для ключевых ручек (`users`, `cars`, `orders`) и smoke-тесты для `payments/deliveries/reviews`.
 
