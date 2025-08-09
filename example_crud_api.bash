@@ -21,8 +21,8 @@ curl -X PUT "http://localhost:8000/v1/users/1" \
   -d '{"email":"new@example.com","is_active":false}'
 
 
-# Удалить
-curl -X DELETE "http://localhost:8000/v1/users/1"
+# # Удалить
+# curl -X DELETE "http://localhost:8000/v1/users/1"
 
 
 # CARS
@@ -55,8 +55,8 @@ curl -X PUT "http://localhost:8000/v1/cars/1" \
   -H "Content-Type: application/json" \
   -d '{"price":11999.99,"status":"reserved"}'
 
-# Удалить
-curl -X DELETE "http://localhost:8000/v1/cars/1"
+# Удалить (оставьте закомментированным, если планируете создавать заказы на car_id=1)
+# curl -X DELETE "http://localhost:8000/v1/cars/1"
 
 
 # ORDERS
@@ -73,8 +73,7 @@ curl -X POST "http://localhost:8000/v1/orders/" \
     "status":"pending",
     "payment_method":"cash",
     "total_amount": 15000.00,
-    "delivery_address":"Москва, ул. Тестовая, д.1",
-    "delivery_date":"2025-08-09T12:06:45Z"
+    "delivery_address":"Москва, ул. Тестовая, д.1"
   }'
 
 # Получить по ID
@@ -86,10 +85,10 @@ curl "http://localhost:8000/v1/orders/?limit=10&offset=0"
 # Обновить
 curl -X PUT "http://localhost:8000/v1/orders/1" \
   -H "Content-Type: application/json" \
-  -d '{"status":"paid","payment_method":"card","delivery_date":"2025-08-10T09:00:00+03:00"}'
+  -d '{"status":"paid","payment_method":"card"}'
 
-# Удалить
-curl -X DELETE "http://localhost:8000/v1/orders/1"
+# # Удалить
+# curl -X DELETE "http://localhost:8000/v1/orders/1"
 
 
 # Примечания:

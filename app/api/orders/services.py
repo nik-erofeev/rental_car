@@ -24,6 +24,7 @@ async def create_order(session: AsyncSession, data: OrderCreate) -> OrderRead:
     if not car:
         raise OrderCarNotFoundException
 
+    # delivery_date устанавливается на стороне сервера при создании
     order = await OrdersDAO.add(session, data)
     await session.commit()
     return OrderRead.model_validate(order)

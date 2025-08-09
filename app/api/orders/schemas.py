@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from pydantic import BaseModel, Field, EmailStr, field_validator
 from pydantic.config import ConfigDict
 
@@ -20,16 +20,7 @@ class BaseOrder(BaseModel):
     payment_method: PaymentMethod
     total_amount: float = Field(ge=0)
     delivery_address: str | None = None
-    delivery_date: datetime | None = None
-
-    @field_validator("delivery_date", mode="after")
-    def normalize_delivery_date(cls, v: datetime | None) -> datetime | None:
-        if v is None:
-            return v
-        # Конвертируем aware -> UTC naive для TIMESTAMP WITHOUT TIME ZONE в БД
-        if v.tzinfo is not None and v.tzinfo.utcoffset(v) is not None:
-            return v.astimezone(timezone.utc).replace(tzinfo=None)
-        return v
+    # delivery_date формируется сервером; из тела запроса не принимается
 
     @field_validator("customer_phone")
     def validate_phone(cls, v):
@@ -62,15 +53,7 @@ class OrderUpdate(BaseModel):
     payment_method: PaymentMethod | None = None
     total_amount: float | None = Field(default=None, ge=0)
     delivery_address: str | None = None
-    delivery_date: datetime | None = None
-
-    @field_validator("delivery_date", mode="after")
-    def normalize_delivery_date(cls, v: datetime | None) -> datetime | None:
-        if v is None:
-            return v
-        if v.tzinfo is not None and v.tzinfo.utcoffset(v) is not None:
-            return v.astimezone(timezone.utc).replace(tzinfo=None)
-        return v
+    # delivery_date не обновляется через API; управляется сервером
 
     @field_validator("customer_phone")
     def validate_phone(cls, v: str | None) -> str | None:
