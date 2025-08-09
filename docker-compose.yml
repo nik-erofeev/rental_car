@@ -19,25 +19,43 @@ services:
       timeout: 5s
       retries: 3
 
-#  backend:
-#    container_name: ${DOCKER_NAME}_api
-#    build:
-#      context: .
+  backend:
+    container_name: ${DOCKER_NAME}_api
+    build:
+      context: .
+    restart: unless-stopped
+    command: ["/app/docker/app.sh"]   #  можно указать dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    networks:
+      - custom
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/check_database" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+#  # todo: для мониторинга PostgreSQL через Prometheus.
+#  postgres_exporter:
+#    container_name: postgres_exporter-smit
+#    image: wrouesnel/postgres_exporter:latest
 #    restart: unless-stopped
-#    command: ["/app/docker/app.sh"]   #  можно указать dockerfile
-#    ports:
-#      - "8000:8000"
-#    depends_on:
-#      - postgres
 #    env_file:
 #      - .env
+#    environment:
+#      # проверить почему не подтягиваются env
+#      #      DATA_SOURCE_URI: "postgres://${DB__USER}:${DB__PASSWORD}@${DB__HOST}:${DB__PORT}/${DB__NAME}?sslmode=disable"
+#      DATA_SOURCE_NAME: "postgres://user:pass@postgres:5432/rental_car?sslmode=disable"
+#    ports:
+#      - "9187:9187"
+#    depends_on:
+#      - postgres
 #    networks:
 #      - custom
-#    healthcheck:
-#      test: [ "CMD", "curl", "-f", "http://localhost:8000/check_database" ]
-#      interval: 30s
-#      timeout: 5s
-#      retries: 3
 
 volumes:
   db_data:
