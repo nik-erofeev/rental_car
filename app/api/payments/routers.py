@@ -4,13 +4,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.settings import APP_CONFIG
 from app.db import get_session_without_commit
-from app.api.payments.schemas import PaymentCreate, PaymentRead, PaymentUpdate
+from app.api.payments.schemas import (
+    PaymentCreate,
+    PaymentRead,
+    PaymentUpdate,
+    PaymentDetailsRead,
+)
 from app.api.payments.services import (
     create_payment,
     get_payment,
     list_payments,
     update_payment,
     delete_payment,
+    get_payment_details,
 )
 
 
@@ -80,3 +86,15 @@ async def delete(
 ):
     await delete_payment(session, payment_id)
     return None
+
+
+@router.get(
+    "/{payment_id}/details",
+    response_model=PaymentDetailsRead,
+    response_class=ORJSONResponse,
+)
+async def details(
+    payment_id: int,
+    session: AsyncSession = Depends(get_session_without_commit),
+):
+    return await get_payment_details(session, payment_id)

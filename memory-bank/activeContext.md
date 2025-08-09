@@ -37,7 +37,7 @@
 
 ## Фокус сейчас
  - Агрегированные ручки для оставшихся сущностей со связями
-   (`payments`, `deliveries`, `reviews`, `car_photos`, `car_reports`) + curl.
+   (`deliveries`, `reviews`, `car_photos`, `car_reports`) + curl.
  - Интеграционные тесты для `users`, `cars`, `orders` и smoke для остальных.
 
 ## Далее

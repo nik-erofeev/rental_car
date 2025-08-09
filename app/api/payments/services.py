@@ -7,6 +7,11 @@ from app.api.payments.schemas import (
     PaymentRead,
     PaymentUpdate,
     PaymentIdFilter,
+    PaymentDetailsRead,
+    PaymentOrderRead,
+    PaymentOrderUserRead,
+    PaymentOrderCarRead,
+    PaymentOrderDeliveryRead,
 )
 from app.dao.payments import PaymentsDAO
 from app.dao.orders import OrdersDAO
@@ -79,3 +84,31 @@ async def delete_payment(session: AsyncSession, payment_id: int) -> None:
     if deleted == 0:
         raise PaymentNotFoundException
     await session.commit()
+
+
+async def get_payment_details(
+    session: AsyncSession,
+    payment_id: int,
+) -> PaymentDetailsRead:
+    """Возвращает платеж и связанный заказ."""
+    payment = await PaymentsDAO.get_with_relations(session, payment_id)
+    if not payment:
+        raise PaymentNotFoundException
+
+    order_read = PaymentOrderRead.model_validate(payment.order)
+    # подставим вложенности
+    order_read.user = (
+        None
+        if payment.order.user is None
+        else PaymentOrderUserRead.model_validate(payment.order.user)
+    )
+    order_read.car = PaymentOrderCarRead.model_validate(payment.order.car)
+    order_read.deliveries = [
+        PaymentOrderDeliveryRead.model_validate(d)
+        for d in payment.order.deliveries
+    ]
+
+    return PaymentDetailsRead(
+        payment=PaymentRead.model_validate(payment),
+        order=order_read,
+    )

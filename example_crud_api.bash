@@ -121,6 +121,9 @@ curl -X POST "http://localhost:8000/v1/payments/" \
 # Получить по ID
 curl "http://localhost:8000/v1/payments/1"
 
+# Детали (связанный заказ)
+curl "http://localhost:8000/v1/payments/1/details"
+
 # Список
 curl "http://localhost:8000/v1/payments/?limit=10&offset=0"
 
