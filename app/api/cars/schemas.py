@@ -50,3 +50,19 @@ class CarUpdate(BaseModel):
 
 class CarIdFilter(BaseModel):
     id: int
+
+
+class CarListFilters(BaseModel):
+    make: str | None = None
+    model: str | None = None
+    status: CarStatus | None = None
+    engine_type: EngineType | None = None
+    price_min: float | None = Field(default=None, ge=0)
+    price_max: float | None = Field(default=None, ge=0)
+    year_min: int | None = None
+    year_max: int | None = None
+    sort_by: str | None = Field(
+        default=None,
+        description="price|year|created_at|updated_at",
+    )
+    sort_dir: str | None = Field(default="desc", description="asc|desc")

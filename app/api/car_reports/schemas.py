@@ -26,5 +26,3 @@ class CarReportUpdate(BaseModel):
 
 class CarReportIdFilter(BaseModel):
     id: int
-
-

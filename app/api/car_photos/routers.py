@@ -4,7 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.settings import APP_CONFIG
 from app.db import get_session_without_commit
-from app.api.car_photos.schemas import CarPhotoCreate, CarPhotoRead, CarPhotoUpdate
+from app.api.car_photos.schemas import (
+    CarPhotoCreate,
+    CarPhotoRead,
+    CarPhotoUpdate,
+)
 from app.api.car_photos.services import (
     create_car_photo,
     get_car_photo,
@@ -81,5 +85,3 @@ async def delete(
 ):
     await delete_car_photo(session, photo_id)
     return None
-
-

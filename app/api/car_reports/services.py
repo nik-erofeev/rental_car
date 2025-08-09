@@ -1,7 +1,6 @@
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
 from app.api.car_reports.exceptions import (
     CarReportNotFoundException,
     CarNotFoundForReportException,
@@ -31,7 +30,10 @@ async def create_car_report(
     return CarReportRead.model_validate(report)
 
 
-async def get_car_report(session: AsyncSession, report_id: int) -> CarReportRead:
+async def get_car_report(
+    session: AsyncSession,
+    report_id: int,
+) -> CarReportRead:
     report = await CarReportsDAO.find_one_or_none_by_id(report_id, session)
     if not report:
         raise CarReportNotFoundException
@@ -46,9 +48,17 @@ async def list_car_reports(
 ) -> list[CarReportRead]:
     if car_id is not None:
         items = await CarReportsDAO.find_by_car(session, car_id)
-        return [CarReportRead.model_validate(i) for i in items[offset : offset + limit]]
+        return [
+            CarReportRead.model_validate(i)
+            for i in items[offset : offset + limit]
+        ]
     page = offset // limit + 1 if limit else 1
-    items = await CarReportsDAO.paginate(session, page=page, page_size=limit, filters=None)
+    items = await CarReportsDAO.paginate(
+        session,
+        page=page,
+        page_size=limit,
+        filters=None,
+    )
     return [CarReportRead.model_validate(i) for i in items]
 
 
@@ -72,9 +82,10 @@ async def update_car_report(
 
 
 async def delete_car_report(session: AsyncSession, report_id: int) -> None:
-    deleted = await CarReportsDAO.delete(session, CarReportIdFilter(id=report_id))
+    deleted = await CarReportsDAO.delete(
+        session,
+        CarReportIdFilter(id=report_id),
+    )
     if deleted == 0:
         raise CarReportNotFoundException
     await session.commit()
-
-

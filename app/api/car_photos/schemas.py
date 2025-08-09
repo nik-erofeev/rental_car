@@ -25,5 +25,3 @@ class CarPhotoUpdate(BaseModel):
 
 class CarPhotoIdFilter(BaseModel):
     id: int
-
-

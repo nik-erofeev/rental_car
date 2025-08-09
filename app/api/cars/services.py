@@ -5,12 +5,7 @@ from app.api.cars.exceptions import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.cars.schemas import (
-    CarCreate,
-    CarRead,
-    CarUpdate,
-    CarIdFilter,
-)
+from app.api.cars.schemas import CarCreate, CarRead, CarUpdate, CarIdFilter
 from app.dao.cars import CarsDAO
 
 
@@ -38,13 +33,32 @@ async def list_cars(
     session: AsyncSession,
     limit: int = 20,
     offset: int = 0,
+    make: str | None = None,
+    model: str | None = None,
+    status: str | None = None,
+    engine_type: str | None = None,
+    price_min: float | None = None,
+    price_max: float | None = None,
+    year_min: int | None = None,
+    year_max: int | None = None,
+    sort_by: str | None = None,
+    sort_dir: str | None = "desc",
 ) -> list[CarRead]:
-    page = offset // limit + 1 if limit else 1
-    cars = await CarsDAO.paginate(
+    # offset/limit используются напрямую в DAO
+    cars = await CarsDAO.find_filtered(
         session,
-        page=page,
-        page_size=limit,
-        filters=None,
+        make=make,
+        model=model,
+        status=status,
+        engine_type=engine_type,
+        price_min=price_min,
+        price_max=price_max,
+        year_min=year_min,
+        year_max=year_max,
+        sort_by=sort_by,
+        sort_dir=sort_dir,
+        limit=limit,
+        offset=offset,
     )
     return [CarRead.model_validate(c) for c in cars]
 

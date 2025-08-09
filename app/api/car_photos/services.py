@@ -1,7 +1,6 @@
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import HTTPException, status
 from app.api.car_photos.exceptions import (
     CarPhotoNotFoundException,
     CarNotFoundForPhotoException,
@@ -46,9 +45,17 @@ async def list_car_photos(
 ) -> list[CarPhotoRead]:
     if car_id is not None:
         items = await CarPhotosDAO.find_by_car(session, car_id)
-        return [CarPhotoRead.model_validate(i) for i in items[offset : offset + limit]]
+        return [
+            CarPhotoRead.model_validate(i)
+            for i in items[offset : offset + limit]
+        ]
     page = offset // limit + 1 if limit else 1
-    items = await CarPhotosDAO.paginate(session, page=page, page_size=limit, filters=None)
+    items = await CarPhotosDAO.paginate(
+        session,
+        page=page,
+        page_size=limit,
+        filters=None,
+    )
     return [CarPhotoRead.model_validate(i) for i in items]
 
 
@@ -60,7 +67,11 @@ async def update_car_photo(
     values = data.model_dump(exclude_unset=True)
     if not values:
         return await get_car_photo(session, photo_id)
-    updated = await CarPhotosDAO.update(session, CarPhotoIdFilter(id=photo_id), data)
+    updated = await CarPhotosDAO.update(
+        session,
+        CarPhotoIdFilter(id=photo_id),
+        data,
+    )
     if updated == 0:
         raise CarPhotoNotFoundException
     photo = await CarPhotosDAO.find_one_or_none_by_id(photo_id, session)
@@ -72,5 +83,3 @@ async def delete_car_photo(session: AsyncSession, photo_id: int) -> None:
     if deleted == 0:
         raise CarPhotoNotFoundException
     await session.commit()
-
-

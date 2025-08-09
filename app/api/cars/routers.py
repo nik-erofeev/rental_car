@@ -53,9 +53,36 @@ async def get(
 async def list_(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    make: str | None = None,
+    model: str | None = None,
+    status: str | None = None,
+    engine_type: str | None = None,
+    price_min: float | None = None,
+    price_max: float | None = None,
+    year_min: int | None = None,
+    year_max: int | None = None,
+    sort_by: str | None = Query(
+        None,
+        description="price|year|created_at|updated_at",
+    ),
+    sort_dir: str | None = Query("desc", description="asc|desc"),
     session: AsyncSession = Depends(get_session_without_commit),
 ):
-    return await list_cars(session, limit, offset)
+    return await list_cars(
+        session,
+        limit,
+        offset,
+        make,
+        model,
+        status,
+        engine_type,
+        price_min,
+        price_max,
+        year_min,
+        year_max,
+        sort_by,
+        sort_dir,
+    )
 
 
 @router.put(

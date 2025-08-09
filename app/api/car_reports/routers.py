@@ -4,7 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.settings import APP_CONFIG
 from app.db import get_session_without_commit
-from app.api.car_reports.schemas import CarReportCreate, CarReportRead, CarReportUpdate
+from app.api.car_reports.schemas import (
+    CarReportCreate,
+    CarReportRead,
+    CarReportUpdate,
+)
 from app.api.car_reports.services import (
     create_car_report,
     get_car_report,
@@ -81,5 +85,3 @@ async def delete(
 ):
     await delete_car_report(session, report_id)
     return None
-
-
