@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import and_, desc, asc
+from sqlalchemy.orm import selectinload
 
 from app.dao.base import BaseDAO
 from app.models.cars import Car
@@ -76,3 +77,26 @@ class CarsDAO(BaseDAO[Car]):
 
         result = await session.execute(query.offset(offset).limit(limit))
         return list(result.scalars().all())
+
+    @classmethod
+    async def get_with_relations(
+        cls,
+        session: AsyncSession,
+        car_id: int,
+    ) -> Car | None:
+        """Вернуть авто со связанными сущностями.
+
+        Включает: photos, reports, reviews, orders.
+        """
+        stmt = (
+            select(cls.model)
+            .where(cls.model.id == car_id)
+            .options(
+                selectinload(cls.model.photos),
+                selectinload(cls.model.reports),
+                selectinload(cls.model.reviews),
+                selectinload(cls.model.orders),
+            )
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()

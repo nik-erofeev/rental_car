@@ -4,13 +4,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.settings import APP_CONFIG
 from app.db import get_session_without_commit
-from app.api.cars.schemas import CarCreate, CarRead, CarUpdate
+from app.api.cars.schemas import CarCreate, CarRead, CarUpdate, CarDetailsRead
 from app.api.cars.services import (
     create_car,
     get_car,
     list_cars,
     update_car,
     delete_car,
+    get_car_details,
 )
 
 
@@ -107,3 +108,15 @@ async def delete(
 ):
     await delete_car(session, car_id)
     return None
+
+
+@router.get(
+    "/{car_id}/details",
+    response_model=CarDetailsRead,
+    response_class=ORJSONResponse,
+)
+async def details(
+    car_id: int,
+    session: AsyncSession = Depends(get_session_without_commit),
+):
+    return await get_car_details(session, car_id)

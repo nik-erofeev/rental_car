@@ -1,6 +1,9 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
 from pydantic.config import ConfigDict
+from app.api.car_photos.schemas import CarPhotoRead
+from app.api.car_reports.schemas import CarReportRead
+from app.api.reviews.schemas import ReviewRead
 
 from app.models.cars import CarCondition, EngineType, Transmission, CarStatus
 
@@ -66,3 +69,34 @@ class CarListFilters(BaseModel):
         description="price|year|created_at|updated_at",
     )
     sort_dir: str | None = Field(default="desc", description="asc|desc")
+
+
+class CarDetailsRead(BaseModel):
+    """Агрегированный ответ по авто со связями."""
+
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+
+    car: CarRead
+    photos: list[CarPhotoRead]
+    reports: list[CarReportRead]
+    reviews: list[ReviewRead]
+    orders: list["CarOrderRead"]
+
+
+class CarOrderRead(BaseModel):
+    """Упрощённое представление заказа в деталях авто.
+
+    Локальная схема, чтобы избежать циклических импортов с orders.schemas.
+    """
+
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+
+    id: int
+    customer_name: str
+    user_id: int | None
+    car_id: int
+    status: str
+    payment_method: str
+    total_amount: float
+    created_at: datetime
+    updated_at: datetime

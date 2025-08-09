@@ -29,11 +29,16 @@
   - Сервис: `get_order_details()`.
   - Схема ответа: `OrderDetailsRead`.
   - Роут: `GET /v1/orders/{order_id}/details` (+ curl пример в `example_crud_api.bash`).
+ - Добавлена агрегированная ручка авто:
+   - DAO: `CarsDAO.get_with_relations()` со `selectinload` для `photos`, `reports`, `reviews`, `orders`.
+   - Сервис: `get_car_details()`.
+   - Схема ответа: `CarDetailsRead` (локальная `CarOrderRead` для избежания циклов).
+   - Роут: `GET /v1/cars/{car_id}/details` (+ curl пример в `example_crud_api.bash`).
 
 ## Фокус сейчас
- - Агрегированные ручки: реализовать `/v1/cars/{car_id}/details` (auto + photos + reports + reviews + orders) и добавить curl-пример.
- - Расширить фильтры/сортировку/пагинацию для `orders` (status, payment_method, диапазоны дат/сумм, сортировка по дате/сумме).
- - Написать минимальные интеграционные тесты для ключевых ручек (`users`, `cars`, `orders`) и smoke-тесты для `payments/deliveries/reviews`.
+ - Агрегированные ручки для оставшихся сущностей со связями
+   (`payments`, `deliveries`, `reviews`, `car_photos`, `car_reports`) + curl.
+ - Интеграционные тесты для `users`, `cars`, `orders` и smoke для остальных.
 
 ## Далее
  - Глубокие фильтры и полнотекстовый поиск, индексы и оптимизация запросов.

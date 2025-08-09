@@ -5,7 +5,13 @@ from app.api.cars.exceptions import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.cars.schemas import CarCreate, CarRead, CarUpdate, CarIdFilter
+from app.api.cars.schemas import (
+    CarCreate,
+    CarRead,
+    CarUpdate,
+    CarIdFilter,
+    CarDetailsRead,
+)
 from app.dao.cars import CarsDAO
 
 
@@ -87,3 +93,27 @@ async def delete_car(session: AsyncSession, car_id: int) -> None:
     if deleted == 0:
         raise CarNotFoundException
     await session.commit()
+
+
+async def get_car_details(
+    session: AsyncSession,
+    car_id: int,
+) -> CarDetailsRead:
+    """Вернуть авто и связанные сущности: photos, reports, reviews, orders."""
+    car = await CarsDAO.get_with_relations(session, car_id)
+    if not car:
+        raise CarNotFoundException
+
+    # Избегаем циклических импортов при валидации
+    from app.api.car_photos.schemas import CarPhotoRead  # noqa: WPS433
+    from app.api.car_reports.schemas import CarReportRead  # noqa: WPS433
+    from app.api.reviews.schemas import ReviewRead  # noqa: WPS433
+    from app.api.cars.schemas import CarOrderRead  # noqa: WPS433
+
+    return CarDetailsRead(
+        car=CarRead.model_validate(car),
+        photos=[CarPhotoRead.model_validate(p) for p in car.photos],
+        reports=[CarReportRead.model_validate(r) for r in car.reports],
+        reviews=[ReviewRead.model_validate(rv) for rv in car.reviews],
+        orders=[CarOrderRead.model_validate(o) for o in car.orders],
+    )
