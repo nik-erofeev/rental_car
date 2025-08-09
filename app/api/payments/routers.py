@@ -57,11 +57,7 @@ async def get(
     response_model=list[PaymentRead],
     response_class=ORJSONResponse,
     summary="Список платежей с фильтрами",
-    description=(
-        "Фильтры: order_id,\n"
-        "status {pending|paid|failed},\n"
-        "payment_type {full|installment|deposit}"
-    ),
+    description=("Фильтры: order_id,\n" "status {pending|paid|failed},\n" "payment_type {full|installment|deposit}"),
 )
 async def list_(
     limit: int = Query(20, ge=1, le=100),

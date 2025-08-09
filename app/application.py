@@ -5,6 +5,7 @@ from collections.abc import AsyncGenerator
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.core.logger_config import configure_logging
 from app.core.settings import AppConfig, APP_CONFIG
 from app.api.users.routers import router as users_router
 from app.api.cars.routers import router as cars_router
@@ -25,7 +26,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-
+# Настройка логирования
+configure_logging()
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +55,7 @@ def _init_routes(app: FastAPI) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[dict, None]:
     """Управление жизненным циклом приложения."""
-    logger.info("Инициализация приложения...")
+    logger.info("🚀 Запуск FastAPI приложения...")
     app.state.database_pool = create_async_engine(
         str(APP_CONFIG.db.sqlalchemy_db_uri),
         echo=APP_CONFIG.db.echo,
@@ -64,8 +66,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[dict, None]:
         expire_on_commit=False,
     )
     yield {}
-    logger.info("Завершение работы приложения...")
+    logger.info("🛑 Завершение работы приложения...")
     await app.state.database_pool.dispose()
+    logger.info("✅ Приложение остановлено.")
 
 
 def create_app(config: AppConfig) -> FastAPI:
@@ -110,7 +113,7 @@ def create_app(config: AppConfig) -> FastAPI:
         request: Request,
         exc: Exception,
     ) -> JSONResponse:
-        logger.error(f"An unexpected error occurred: {exc=!r}")
+        logger.error(f"❌An unexpected error occurred: {exc=!r}")
         return JSONResponse(
             status_code=500,
             content={"detail": "An unexpected error occurred"},

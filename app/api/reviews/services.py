@@ -29,18 +29,21 @@ async def create_review(
     session: AsyncSession,
     data: ReviewCreate,
 ) -> ReviewRead:
-    logger.info("[reviews] Создание отзыва: %s", data)
     # FK проверки
     if not await CarsDAO.find_one_or_none_by_id(data.car_id, session):
-        logger.warning("[reviews] Авто не найдено для отзыва car_id=%s",
-                       data.car_id)
+        logger.warning(
+            "[reviews] Авто не найдено для отзыва car_id=%s",
+            data.car_id,
+        )
         raise CarNotFoundForReviewException
     if data.user_id is not None and not await UsersDAO.find_one_or_none_by_id(
         data.user_id,
         session,
     ):
-        logger.warning("[reviews] Пользователь не найден user_id=%s",
-                       data.user_id)
+        logger.warning(
+            "[reviews] Пользователь не найден user_id=%s",
+            data.user_id,
+        )
         raise UserNotFoundForReviewException
 
     review = await ReviewsDAO.add(session, data)
@@ -50,7 +53,6 @@ async def create_review(
 
 
 async def get_review(session: AsyncSession, review_id: int) -> ReviewRead:
-    logger.info("[reviews] Получение отзыва id=%s", review_id)
     review = await ReviewsDAO.find_one_or_none_by_id(review_id, session)
     if not review:
         logger.warning("[reviews] Отзыв не найден id=%s", review_id)
@@ -68,13 +70,6 @@ async def list_reviews(
     rating_max: int | None = None,
     q: str | None = None,
 ) -> list[ReviewRead]:
-    logger.info(
-        "[reviews] Список отзывов: limit=%s offset=%s user_id=%s car_id=%s",
-        limit,
-        offset,
-        user_id,
-        car_id,
-    )
     items = await ReviewsDAO.find_filtered(
         session,
         user_id=user_id,
@@ -89,7 +84,6 @@ async def list_reviews(
         logger.info("[reviews] По фильтрам отзывы не найдены")
         raise ReviewsNotFoundByFiltersException
     result = [ReviewRead.model_validate(i) for i in items]
-    logger.info("[reviews] Найдено отзывов: %s", len(result))
     return result
 
 
@@ -136,7 +130,6 @@ async def get_review_details(
     session: AsyncSession,
     review_id: int,
 ) -> ReviewDetailsRead:
-    logger.info("[reviews] Детали отзыва id=%s", review_id)
     review = await ReviewsDAO.get_with_relations(session, review_id)
     if not review:
         logger.warning(
@@ -172,5 +165,4 @@ async def get_review_details(
             updated_at=car.updated_at,
         ),
     )
-    logger.info("[reviews] Детали отзыва собраны id=%s", review_id)
     return result

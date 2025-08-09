@@ -75,8 +75,6 @@ class Base(AsyncAttrs, DeclarativeBase):
 
         fmt = "{}({})"
         class_ = self.__class__.__name__
-        attrs = sorted(
-            (k, getattr(self, k)) for k in self.__mapper__.columns.keys()
-        )
+        attrs = sorted((k, getattr(self, k)) for k in self.__mapper__.columns.keys())
         sattrs = ", ".join("{}={!r}".format(*x) for x in attrs)
         return fmt.format(class_, sattrs)

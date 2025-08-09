@@ -56,11 +56,7 @@ async def get(
     response_model=list[DeliveryRead],
     response_class=ORJSONResponse,
     summary="Список доставок с фильтрами",
-    description=(
-        "Фильтры: order_id,\n"
-        "status {pending|in_progress|delivered|failed},\n"
-        "q (по tracking_number)"
-    ),
+    description=("Фильтры: order_id,\n" "status {pending|in_progress|delivered|failed},\n" "q (по tracking_number)"),
 )
 async def list_(
     limit: int = Query(20, ge=1, le=100),

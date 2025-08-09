@@ -29,7 +29,6 @@ async def create_payment(
     session: AsyncSession,
     data: PaymentCreate,
 ) -> PaymentRead:
-    logger.info("[payments] Создание платежа: %s", data)
     # Проверка существования заказа
     order = await OrdersDAO.find_one_or_none_by_id(data.order_id, session)
     if not order:
@@ -46,7 +45,6 @@ async def create_payment(
 
 
 async def get_payment(session: AsyncSession, payment_id: int) -> PaymentRead:
-    logger.info("[payments] Получение платежа id=%s", payment_id)
     payment = await PaymentsDAO.find_one_or_none_by_id(payment_id, session)
     if not payment:
         logger.warning("[payments] Платёж не найден id=%s", payment_id)
@@ -62,8 +60,6 @@ async def list_payments(
     status: str | None = None,
     payment_type: str | None = None,
 ) -> list[PaymentRead]:
-    logger.info("[payments] Список платежей: limit=%s offset=%s order_id=%s",
-                limit, offset, order_id)
     items = await PaymentsDAO.find_filtered(
         session,
         order_id=order_id,
@@ -76,7 +72,6 @@ async def list_payments(
         logger.info("[payments] По фильтрам платежи не найдены")
         raise PaymentsNotFoundByFiltersException
     result = [PaymentRead.model_validate(i) for i in items]
-    logger.info("[payments] Найдено платежей: %s", len(result))
     return result
 
 
@@ -124,7 +119,6 @@ async def get_payment_details(
     payment_id: int,
 ) -> PaymentDetailsRead:
     """Возвращает платеж и связанный заказ."""
-    logger.info("[payments] Детали платежа id=%s", payment_id)
     payment = await PaymentsDAO.get_with_relations(session, payment_id)
     if not payment:
         logger.warning(
@@ -135,20 +129,12 @@ async def get_payment_details(
 
     order_read = PaymentOrderRead.model_validate(payment.order)
     # подставим вложенности
-    order_read.user = (
-        None
-        if payment.order.user is None
-        else PaymentOrderUserRead.model_validate(payment.order.user)
-    )
+    order_read.user = None if payment.order.user is None else PaymentOrderUserRead.model_validate(payment.order.user)
     order_read.car = PaymentOrderCarRead.model_validate(payment.order.car)
-    order_read.deliveries = [
-        PaymentOrderDeliveryRead.model_validate(d)
-        for d in payment.order.deliveries
-    ]
+    order_read.deliveries = [PaymentOrderDeliveryRead.model_validate(d) for d in payment.order.deliveries]
 
     result = PaymentDetailsRead(
         payment=PaymentRead.model_validate(payment),
         order=order_read,
     )
-    logger.info("[payments] Детали платежа собраны id=%s", payment_id)
     return result

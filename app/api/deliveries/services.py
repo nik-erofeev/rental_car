@@ -30,11 +30,12 @@ async def create_delivery(
     session: AsyncSession,
     data: DeliveryCreate,
 ) -> DeliveryRead:
-    logger.info("[deliveries] Создание доставки: %s", data)
     # Проверка, что заказ существует
     if not await OrdersDAO.find_one_or_none_by_id(data.order_id, session):
-        logger.warning("[deliveries] Заказ не найден для доставки order_id=%s",
-                       data.order_id)
+        logger.warning(
+            "[deliveries] Заказ не найден для доставки order_id=%s",
+            data.order_id,
+        )
         raise OrderNotFoundForDeliveryException
     delivery = await DeliveriesDAO.add(session, data)
     await session.commit()
@@ -46,7 +47,6 @@ async def get_delivery(
     session: AsyncSession,
     delivery_id: int,
 ) -> DeliveryRead:
-    logger.info("[deliveries] Получение доставки id=%s", delivery_id)
     delivery = await DeliveriesDAO.find_one_or_none_by_id(delivery_id, session)
     if not delivery:
         logger.warning("[deliveries] Доставка не найдена id=%s", delivery_id)
@@ -62,8 +62,6 @@ async def list_deliveries(
     status: str | None = None,
     q: str | None = None,
 ) -> list[DeliveryRead]:
-    logger.info("[deliveries] Список доставок: limit=%s offset=%s order_id=%s",
-                limit, offset, order_id)
     items = await DeliveriesDAO.find_filtered(
         session,
         order_id=order_id,
@@ -76,7 +74,6 @@ async def list_deliveries(
         logger.info("[deliveries] По фильтрам доставки не найдены")
         raise DeliveriesNotFoundByFiltersException
     result = [DeliveryRead.model_validate(i) for i in items]
-    logger.info("[deliveries] Найдено доставок: %s", len(result))
     return result
 
 
@@ -126,7 +123,6 @@ async def get_delivery_details(
     session: AsyncSession,
     delivery_id: int,
 ) -> DeliveryDetailsRead:
-    logger.info("[deliveries] Детали доставки id=%s", delivery_id)
     delivery = await DeliveriesDAO.get_with_relations(session, delivery_id)
     if not delivery:
         logger.warning(
@@ -137,8 +133,7 @@ async def get_delivery_details(
 
     order = delivery.order
 
-    order_user: User | None = None
-    order_user = order.user if order.user is not None else None
+    order_user: User | None = order.user if order.user is not None else None
 
     result = DeliveryDetailsRead(
         delivery=DeliveryRead.model_validate(delivery),
@@ -187,5 +182,4 @@ async def get_delivery_details(
             ],
         ),
     )
-    logger.info("[deliveries] Детали доставки собраны id=%s", delivery_id)
     return result

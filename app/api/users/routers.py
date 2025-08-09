@@ -29,10 +29,7 @@ router = APIRouter(
 @router.post(
     "/",
     summary="Регистрация нового пользователя",
-    description=(
-        "Создаёт нового пользователя по email и паролю. "
-        "Возвращает данные созданного пользователя."
-    ),
+    description=("Создаёт нового пользователя по email и паролю. " "Возвращает данные созданного пользователя."),
     response_model=UserRead,
     status_code=status.HTTP_201_CREATED,
     response_class=ORJSONResponse,
@@ -47,9 +44,7 @@ async def register_user(
 @router.get(
     "/{user_id}",
     summary="Получить пользователя по ID",
-    description=(
-        "Возвращает данные пользователя по его уникальному идентификатору."
-    ),
+    description=("Возвращает данные пользователя по его уникальному идентификатору."),
     response_model=UserRead,
     response_class=ORJSONResponse,
     status_code=status.HTTP_200_OK,
@@ -65,8 +60,7 @@ async def get_user(
     "/",
     summary="Получить список пользователей",
     description=(
-        "Возвращает список пользователей с возможностью фильтрации по "
-        "статусу активности, а также с пагинацией."
+        "Возвращает список пользователей с возможностью фильтрации по " "статусу активности, а также с пагинацией."
     ),
     response_model=list[UserRead],
     response_class=ORJSONResponse,
@@ -96,8 +90,7 @@ async def get_users(
     response_model=UserRead,
     summary="Обновить пользователя",
     description=(
-        "Обновляет email или статус активности пользователя по его ID. "
-        "Возвращает обновлённые данные пользователя."
+        "Обновляет email или статус активности пользователя по его ID. " "Возвращает обновлённые данные пользователя."
     ),
 )
 async def update_user(

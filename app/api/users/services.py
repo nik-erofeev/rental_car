@@ -44,7 +44,6 @@ async def example_create_user(
 
 
 async def example_get_user(session: AsyncSession, user_id: int) -> UserRead:
-    logger.info("[users] Получение пользователя id=%s", user_id)
     user = await UsersDAO.find_one_or_none_by_id(user_id, session)
     if not user:
         logger.warning("[users] Пользователь не найден id=%s", user_id)
@@ -99,12 +98,6 @@ async def example_get_users(
     limit: int = 20,
     offset: int = 0,
 ) -> list[UserRead]:
-    logger.info(
-        "[users] Список пользователей: is_active=%s, limit=%s, offset=%s",
-        is_active,
-        limit,
-        offset,
-    )
     page = offset // limit + 1 if limit else 1
     filters = UserListFilter(is_active=is_active)
     users = await UsersDAO.paginate(
@@ -113,7 +106,6 @@ async def example_get_users(
         page_size=limit,
         filters=filters,
     )
-    logger.info("[users] Найдено пользователей: %s", len(users))
     return [UserRead.model_validate(user) for user in users]
 
 
@@ -125,7 +117,6 @@ async def get_user_profile(
 
     Содержит данные пользователя, его заказы и его отзывы.
     """
-    logger.info("[users] Профиль пользователя id=%s", user_id)
     user = await UsersDAO.get_with_relations(session, user_id)
     if not user:
         logger.warning(
@@ -145,11 +136,5 @@ async def get_user_profile(
         reviews=[ReviewRead.model_validate(r) for r in reviews],
         cars=[CarRead.model_validate(c) for c in cars],
     )
-    logger.info(
-        "[users] Профиль собран id=%s: orders=%s reviews=%s cars=%s",
-        user_id,
-        len(orders),
-        len(reviews),
-        len(cars),
-    )
+
     return result

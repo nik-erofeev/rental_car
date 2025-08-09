@@ -14,13 +14,16 @@ from app.api.cars.schemas import (
     CarDetailsRead,
 )
 from app.dao.cars import CarsDAO
+from app.api.car_photos.schemas import CarPhotoRead
+from app.api.car_reports.schemas import CarReportRead
+from app.api.reviews.schemas import ReviewRead
+from app.api.cars.schemas import CarOrderRead
 
 
 logger = logging.getLogger(__name__)
 
 
 async def create_car(session: AsyncSession, data: CarCreate) -> CarRead:
-    logger.info("[cars] Создание авто: %s", data)
     if await CarsDAO.get_by_vin(session, data.vin):
         logger.warning("[cars] VIN уже существует: %s", data.vin)
         raise CarAlreadyExistsException
@@ -31,7 +34,6 @@ async def create_car(session: AsyncSession, data: CarCreate) -> CarRead:
 
 
 async def get_car(session: AsyncSession, car_id: int) -> CarRead:
-    logger.info("[cars] Получение авто id=%s", car_id)
     car = await CarsDAO.find_one_or_none_by_id(car_id, session)
     if not car:
         logger.warning("[cars] Авто не найдено id=%s", car_id)
@@ -54,13 +56,6 @@ async def list_cars(
     sort_by: str | None = None,
     sort_dir: str | None = "desc",
 ) -> list[CarRead]:
-    logger.info(
-        "[cars] Список авто: limit=%s offset=%s make=%s model=%s",
-        limit,
-        offset,
-        make,
-        model,
-    )
     # offset/limit используются напрямую в DAO
     cars = await CarsDAO.find_filtered(
         session,
@@ -81,7 +76,6 @@ async def list_cars(
         logger.info("[cars] По фильтрам авто не найдены")
         raise CarsNotFoundByFiltersException
     result = [CarRead.model_validate(c) for c in cars]
-    logger.info("[cars] Найдено авто: %s", len(result))
     return result
 
 
@@ -123,17 +117,10 @@ async def get_car_details(
     car_id: int,
 ) -> CarDetailsRead:
     """Вернуть авто и связанные сущности: photos, reports, reviews, orders."""
-    logger.info("[cars] Детали авто id=%s", car_id)
     car = await CarsDAO.get_with_relations(session, car_id)
     if not car:
         logger.warning("[cars] Авто не найдено для деталей id=%s", car_id)
         raise CarNotFoundException
-
-    # Избегаем циклических импортов при валидации
-    from app.api.car_photos.schemas import CarPhotoRead  # noqa: WPS433
-    from app.api.car_reports.schemas import CarReportRead  # noqa: WPS433
-    from app.api.reviews.schemas import ReviewRead  # noqa: WPS433
-    from app.api.cars.schemas import CarOrderRead  # noqa: WPS433
 
     details = CarDetailsRead(
         car=CarRead.model_validate(car),
@@ -142,5 +129,4 @@ async def get_car_details(
         reviews=[ReviewRead.model_validate(rv) for rv in car.reviews],
         orders=[CarOrderRead.model_validate(o) for o in car.orders],
     )
-    logger.info("[cars] Детали авто собраны id=%s", car_id)
     return details

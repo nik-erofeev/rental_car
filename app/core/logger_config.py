@@ -3,8 +3,9 @@ import logging
 from colorama import Fore, Style
 
 DEFAULT_LOG_FORMAT = "[%(asctime)s.%(msecs)03d] %(funcName)20s %(module)s:%(lineno)d %(levelname)-8s - %(message)s"  # noqa: E501 : ignore
+# DEFAULT_LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-#
+
 # def configure_logging(level: int = logging.INFO) -> None:
 #     logging.basicConfig(
 #         level=level,
@@ -25,9 +26,7 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record):
         if record.levelno in self.COLORS:
             record.levelname = f"{self.COLORS[record.levelno]}{record.levelname}{Style.RESET_ALL}"
-            record.msg = (
-                f"{self.COLORS[record.levelno]}{record.msg}{Style.RESET_ALL}"
-            )
+            record.msg = f"{self.COLORS[record.levelno]}{record.msg}{Style.RESET_ALL}"
         return super().format(record)
 
 
@@ -47,11 +46,12 @@ def configure_logging(level: int = logging.INFO) -> None:
     console_handler.setFormatter(ColoredFormatter(DEFAULT_LOG_FORMAT))
     logger.addHandler(console_handler)
 
-    # # Применяем к Uvicorn логгерам
-    # uvicorn_loggers = ["uvicorn", "uvicorn.error", "uvicorn.access"]
-    # for name in uvicorn_loggers:
-    #     uv_logger = logging.getLogger(name)
-    #     uv_logger.handlers.clear()
-    #     uv_logger.propagate = True  # Чтобы шли через root
-    #     uv_logger.setLevel(level)
-    #     uv_logger.addHandler(console_handler)
+
+# # Применяем к Uvicorn логгерам
+# uvicorn_loggers = ["uvicorn", "uvicorn.error", "uvicorn.access"]
+# for name in uvicorn_loggers:
+#     uv_logger = logging.getLogger(name)
+#     uv_logger.handlers.clear()
+#     uv_logger.propagate = True  # Чтобы шли через root
+#     uv_logger.setLevel(level)
+#     uv_logger.addHandler(console_handler)

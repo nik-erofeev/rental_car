@@ -57,9 +57,7 @@ class AppConfig(BaseSettings):
 
     db: DbConfig = DbConfig()
     api: Api = Api()
-    cors_origin_regex: str = (
-        r"(http://|https://)?(.*\.)?(qa|stage|localhost|0.0.0.0)(\.ru)?(:\d+)?$"
-    )
+    cors_origin_regex: str = r"(http://|https://)?(.*\.)?(qa|stage|localhost|0.0.0.0)(\.ru)?(:\d+)?$"
     # environment: Environments = Environments.local
     # SECRET_KEY: str
     # ALGORITHM: str
@@ -75,4 +73,4 @@ class AppConfig(BaseSettings):
     )
 
 
-APP_CONFIG = AppConfig()
+APP_CONFIG = AppConfig()  # type: ignore

@@ -16,13 +16,15 @@ from app.api.orders.schemas import (
 from app.dao.orders import OrdersDAO
 from app.dao.cars import CarsDAO
 from app.api.orders.exceptions import OrdersNotFoundByFiltersException
+from app.api.cars.schemas import CarRead
+from app.api.payments.schemas import PaymentRead
+from app.api.deliveries.schemas import DeliveryRead
 
 
 logger = logging.getLogger(__name__)
 
 
 async def create_order(session: AsyncSession, data: OrderCreate) -> OrderRead:
-    logger.info("[orders] Создание заказа: %s", data)
     # Валидация ссылок
     car = await CarsDAO.find_one_or_none_by_id(data.car_id, session)
     if not car:
@@ -40,7 +42,6 @@ async def create_order(session: AsyncSession, data: OrderCreate) -> OrderRead:
 
 
 async def get_order(session: AsyncSession, order_id: int) -> OrderRead:
-    logger.info("[orders] Получение заказа id=%s", order_id)
     order = await OrdersDAO.find_one_or_none_by_id(order_id, session)
     if not order:
         logger.warning("[orders] Заказ не найден id=%s", order_id)
@@ -58,13 +59,6 @@ async def list_orders(
     payment_method: str | None = None,
     q: str | None = None,
 ) -> list[OrderRead]:
-    logger.info(
-        "[orders] Список заказов: limit=%s offset=%s user_id=%s car_id=%s",
-        limit,
-        offset,
-        user_id,
-        car_id,
-    )
     orders = await OrdersDAO.find_filtered(
         session,
         user_id=user_id,
@@ -79,7 +73,6 @@ async def list_orders(
         logger.info("[orders] По фильтрам заказы не найдены")
         raise OrdersNotFoundByFiltersException
     result = [OrderRead.model_validate(o) for o in orders]
-    logger.info("[orders] Найдено заказов: %s", len(result))
     return result
 
 
@@ -127,27 +120,16 @@ async def get_order_details(
 
     Включает: user, car, payments, deliveries.
     """
-    logger.info("[orders] Детали заказа id=%s", order_id)
     order = await OrdersDAO.get_with_relations(session, order_id)
     if not order:
         logger.warning("[orders] Заказ не найден для деталей id=%s", order_id)
         raise OrderNotFoundException
 
-    # Импорты схем здесь, чтобы не создавать циклы на уровне модулей
-    from app.api.cars.schemas import CarRead  # noqa: WPS433
-    from app.api.payments.schemas import PaymentRead  # noqa: WPS433
-    from app.api.deliveries.schemas import DeliveryRead  # noqa: WPS433
-
     result = OrderDetailsRead(
         order=OrderRead.model_validate(order),
-        user=(
-            None
-            if order.user is None
-            else OrderUserRead.model_validate(order.user)
-        ),
+        user=(None if order.user is None else OrderUserRead.model_validate(order.user)),
         car=CarRead.model_validate(order.car),
         payments=[PaymentRead.model_validate(p) for p in order.payments],
         deliveries=[DeliveryRead.model_validate(d) for d in order.deliveries],
     )
-    logger.info("[orders] Детали заказа собраны id=%s", order_id)
     return result
