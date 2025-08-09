@@ -147,3 +147,30 @@ curl -X PUT "http://localhost:8000/v1/deliveries/1" \
 
 # Удалить
 # curl -X DELETE "http://localhost:8000/v1/deliveries/1"
+
+
+# REVIEWS
+# Создать
+curl -X POST "http://localhost:8000/v1/reviews/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "customer_name": "Иван",
+    "user_id": 1,
+    "car_id": 1,
+    "rating": 5,
+    "comment": "Отличный автомобиль"
+  }'
+
+# Получить по ID
+curl "http://localhost:8000/v1/reviews/1"
+
+# Список (по car_id)
+curl "http://localhost:8000/v1/reviews/?car_id=1&limit=10&offset=0"
+
+# Обновить
+curl -X PUT "http://localhost:8000/v1/reviews/1" \
+  -H "Content-Type: application/json" \
+  -d '{"rating":4,"comment":"Норм, но есть нюансы"}'
+
+# Удалить
+# curl -X DELETE "http://localhost:8000/v1/reviews/1"

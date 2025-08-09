@@ -11,6 +11,7 @@ from app.api.cars.routers import router as cars_router
 from app.api.orders.routers import router as orders_router
 from app.api.payments.routers import router as payments_router
 from app.api.deliveries.routers import router as deliveries_router
+from app.api.reviews.routers import router as reviews_router
 
 
 from app.api.default.routers import router as default_router
@@ -24,6 +25,25 @@ from sqlalchemy.ext.asyncio import (
 
 
 logger = logging.getLogger(__name__)
+
+
+def _init_routes(app: FastAPI) -> None:
+    """Подключение всех роутеров к приложению.
+
+    Args:
+        app: Экземпляр FastAPI, к которому нужно подключить роутеры
+    """
+    routers = [
+        default_router,
+        users_router,
+        cars_router,
+        orders_router,
+        payments_router,
+        deliveries_router,
+        reviews_router,
+    ]
+    for router in routers:
+        app.include_router(router)
 
 
 @asynccontextmanager
@@ -51,7 +71,7 @@ def create_app(config: AppConfig) -> FastAPI:
     Returns:
         Сконфигурированное приложение FastAPI
     """
-    app = FastAPI(
+    app_ = FastAPI(
         title=config.api.project_name,
         description=config.api.description,
         version=config.api.version,
@@ -61,7 +81,7 @@ def create_app(config: AppConfig) -> FastAPI:
         lifespan=lifespan,
     )
 
-    app.add_middleware(
+    app_.add_middleware(
         CORSMiddleware,
         allow_origins=config.cors_origin_regex,
         allow_credentials=True,
@@ -74,19 +94,14 @@ def create_app(config: AppConfig) -> FastAPI:
         should_group_status_codes=False,
         excluded_handlers=[".*admin.*", "/metrics"],
     )
-    instrumentator.instrument(app).expose(
-        app,
+    instrumentator.instrument(app_).expose(
+        app_,
         include_in_schema=True,
     )  # можно выкл
 
-    app.include_router(default_router)
-    app.include_router(users_router)
-    app.include_router(cars_router)
-    app.include_router(orders_router)
-    app.include_router(payments_router)
-    app.include_router(deliveries_router)
+    _init_routes(app_)
 
-    @app.exception_handler(Exception)
+    @app_.exception_handler(Exception)
     async def http_exception_handler(
         request: Request,
         exc: Exception,
@@ -97,8 +112,8 @@ def create_app(config: AppConfig) -> FastAPI:
             content={"detail": "An unexpected error occurred"},
         )
 
-    @app.get("/")
+    @app_.get("/")
     def root():
         return {"message": "Rental_Car API 🚀"}
 
-    return app
+    return app_
