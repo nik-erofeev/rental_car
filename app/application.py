@@ -7,12 +7,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.settings import AppConfig, APP_CONFIG
 from app.api.users.routers import router as users_router
+from app.api.cars.routers import router as cars_router
 
 
 from app.api.default.routers import router as default_router
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -31,7 +36,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[dict, None]:
         class_=AsyncSession,
         expire_on_commit=False,
     )
-    yield
+    yield {}
     logger.info("Завершение работы приложения...")
     await app.state.database_pool.dispose()
 
@@ -66,13 +71,20 @@ def create_app(config: AppConfig) -> FastAPI:
         should_group_status_codes=False,
         excluded_handlers=[".*admin.*", "/metrics"],
     )
-    instrumentator.instrument(app).expose(app, include_in_schema=True)  # можно выкл
+    instrumentator.instrument(app).expose(
+        app,
+        include_in_schema=True,
+    )  # можно выкл
 
     app.include_router(default_router)
     app.include_router(users_router)
+    app.include_router(cars_router)
 
     @app.exception_handler(Exception)
-    async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    async def http_exception_handler(
+        request: Request,
+        exc: Exception,
+    ) -> JSONResponse:
         logger.error(f"An unexpected error occurred: {exc=!r}")
         return JSONResponse(
             status_code=500,
