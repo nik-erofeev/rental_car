@@ -174,3 +174,53 @@ curl -X PUT "http://localhost:8000/v1/reviews/1" \
 
 # Удалить
 # curl -X DELETE "http://localhost:8000/v1/reviews/1"
+
+
+# CAR PHOTOS
+# Создать
+curl -X POST "http://localhost:8000/v1/car-photos/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "car_id": 1,
+    "url": "https://img.example.com/cars/1-extra.jpg",
+    "is_main": false
+  }'
+
+# Получить по ID
+curl "http://localhost:8000/v1/car-photos/1"
+
+# Список по car_id
+curl "http://localhost:8000/v1/car-photos/?car_id=1&limit=10&offset=0"
+
+# Обновить
+curl -X PUT "http://localhost:8000/v1/car-photos/1" \
+  -H "Content-Type: application/json" \
+  -d '{"is_main":true}'
+
+# Удалить
+# curl -X DELETE "http://localhost:8000/v1/car-photos/1"
+
+
+# CAR REPORTS
+# Создать
+curl -X POST "http://localhost:8000/v1/car-reports/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "car_id": 1,
+    "report_type": "vin_check",
+    "data": {"score": 99, "notes": "ok"}
+  }'
+
+# Получить по ID
+curl "http://localhost:8000/v1/car-reports/1"
+
+# Список по car_id
+curl "http://localhost:8000/v1/car-reports/?car_id=1&limit=10&offset=0"
+
+# Обновить
+curl -X PUT "http://localhost:8000/v1/car-reports/1" \
+  -H "Content-Type: application/json" \
+  -d '{"data":{"score": 95, "notes": "updated"}}'
+
+# Удалить
+# curl -X DELETE "http://localhost:8000/v1/car-reports/1"

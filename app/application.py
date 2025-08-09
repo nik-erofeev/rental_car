@@ -12,6 +12,8 @@ from app.api.orders.routers import router as orders_router
 from app.api.payments.routers import router as payments_router
 from app.api.deliveries.routers import router as deliveries_router
 from app.api.reviews.routers import router as reviews_router
+from app.api.car_photos.routers import router as car_photos_router
+from app.api.car_reports.routers import router as car_reports_router
 
 
 from app.api.default.routers import router as default_router
@@ -41,6 +43,8 @@ def _init_routes(app: FastAPI) -> None:
         payments_router,
         deliveries_router,
         reviews_router,
+        car_photos_router,
+        car_reports_router,
     ]
     for router in routers:
         app.include_router(router)

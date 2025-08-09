@@ -31,5 +31,3 @@ class ReviewUpdate(BaseModel):
 
 class ReviewIdFilter(BaseModel):
     id: int
-
-

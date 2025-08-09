@@ -4,81 +4,82 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.settings import APP_CONFIG
 from app.db import get_session_without_commit
-from app.api.reviews.schemas import ReviewCreate, ReviewRead, ReviewUpdate
-from app.api.reviews.services import (
-    create_review,
-    get_review,
-    list_reviews,
-    update_review,
-    delete_review,
+from app.api.car_reports.schemas import CarReportCreate, CarReportRead, CarReportUpdate
+from app.api.car_reports.services import (
+    create_car_report,
+    get_car_report,
+    list_car_reports,
+    update_car_report,
+    delete_car_report,
 )
 
 
 router = APIRouter(
-    prefix=f"{APP_CONFIG.api.v1}/reviews",
-    tags=["reviews"],
+    prefix=f"{APP_CONFIG.api.v1}/car-reports",
+    tags=["car_reports"],
 )
 
 
 @router.post(
     "/",
-    response_model=ReviewRead,
+    response_model=CarReportRead,
     status_code=status.HTTP_201_CREATED,
     response_class=ORJSONResponse,
 )
 async def create(
-    data: ReviewCreate,
+    data: CarReportCreate,
     session: AsyncSession = Depends(get_session_without_commit),
 ):
-    return await create_review(session, data)
+    return await create_car_report(session, data)
 
 
 @router.get(
-    "/{review_id}",
-    response_model=ReviewRead,
+    "/{report_id}",
+    response_model=CarReportRead,
     response_class=ORJSONResponse,
 )
 async def get(
-    review_id: int,
+    report_id: int,
     session: AsyncSession = Depends(get_session_without_commit),
 ):
-    return await get_review(session, review_id)
+    return await get_car_report(session, report_id)
 
 
 @router.get(
     "/",
-    response_model=list[ReviewRead],
+    response_model=list[CarReportRead],
     response_class=ORJSONResponse,
 )
 async def list_(
+    car_id: int | None = None,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
-    user_id: int | None = None,
-    car_id: int | None = None,
     session: AsyncSession = Depends(get_session_without_commit),
 ):
-    return await list_reviews(session, limit, offset, user_id, car_id)
+    return await list_car_reports(session, car_id, limit, offset)
 
 
 @router.put(
-    "/{review_id}",
-    response_model=ReviewRead,
+    "/{report_id}",
+    response_model=CarReportRead,
 )
 async def update(
-    review_id: int,
-    data: ReviewUpdate,
+    report_id: int,
+    data: CarReportUpdate,
     session: AsyncSession = Depends(get_session_without_commit),
 ):
-    return await update_review(session, review_id, data)
+    return await update_car_report(session, report_id, data)
 
 
 @router.delete(
-    "/{review_id}",
+    "/{report_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete(
-    review_id: int,
+    report_id: int,
     session: AsyncSession = Depends(get_session_without_commit),
 ):
-    await delete_review(session, review_id)
+    await delete_car_report(session, report_id)
     return None
+
+
