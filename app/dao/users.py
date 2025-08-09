@@ -8,7 +8,11 @@ class UsersDAO(BaseDAO[User]):
     model = User
 
     @classmethod
-    async def get_by_email(cls, session: AsyncSession, email: str) -> User | None:
+    async def get_by_email(
+        cls,
+        session: AsyncSession,
+        email: str,
+    ) -> User | None:
         result = await session.execute(
             select(cls.model).where(cls.model.email == email),
         )

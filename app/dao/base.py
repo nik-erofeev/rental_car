@@ -3,7 +3,11 @@ from collections.abc import Sequence
 from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
-from sqlalchemy import delete as sqlalchemy_delete, func, update as sqlalchemy_update
+from sqlalchemy import (
+    delete as sqlalchemy_delete,
+    func,
+    update as sqlalchemy_update,
+)
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -58,7 +62,9 @@ class BaseDAO(Generic[T]):
                 logger.info(f"Запись не найдена по фильтрам: {filter_dict}")
             return record
         except SQLAlchemyError as e:
-            logger.error(f"Ошибка при поиске записи по фильтрам {filter_dict}: {e}")
+            logger.error(
+                f"Ошибка при поиске записи по фильтрам {filter_dict}: {e}",
+            )
             raise
 
     @classmethod
@@ -79,7 +85,9 @@ class BaseDAO(Generic[T]):
             pet_id = filter_dict.pop("pet_id", None)
             if pet_id is not None:
                 if isinstance(pet_id, list):
-                    query = query.where(getattr(cls.model, "pet_id").in_(pet_id))
+                    query = query.where(
+                        getattr(cls.model, "pet_id").in_(pet_id),
+                    )
                 else:
                     query = query.where(getattr(cls.model, "pet_id") == pet_id)
             if filter_dict:
@@ -146,7 +154,9 @@ class BaseDAO(Generic[T]):
         )
         query = (
             sqlalchemy_update(cls.model)
-            .where(*[getattr(cls.model, k) == v for k, v in filter_dict.items()])
+            .where(
+                *[getattr(cls.model, k) == v for k, v in filter_dict.items()],
+            )
             .values(**values_dict)
             .execution_options(synchronize_session="fetch")
         )
@@ -163,7 +173,9 @@ class BaseDAO(Generic[T]):
     @classmethod
     async def delete(cls, session: AsyncSession, filters: BaseModel) -> int:
         filter_dict = filters.model_dump(exclude_unset=True)
-        logger.info(f"Удаление записей {cls.model.__name__} по фильтру: {filter_dict}")
+        logger.info(
+            f"Удаление записей {cls.model.__name__} по фильтру: {filter_dict}",
+        )
         if not filter_dict:
             logger.error("Нужен хотя бы один фильтр для удаления.")
             raise ValueError("Нужен хотя бы один фильтр для удаления.")
@@ -222,7 +234,11 @@ class BaseDAO(Generic[T]):
             raise
 
     @classmethod
-    async def find_by_ids(cls, session: AsyncSession, ids: list[int]) -> list[Any]:
+    async def find_by_ids(
+        cls,
+        session: AsyncSession,
+        ids: list[int],
+    ) -> list[Any]:
         logger.info(f"Поиск записей {cls.model.__name__} по списку ID: {ids}")
         try:
             query = select(cls.model).filter(cls.model.id.in_(ids))
@@ -256,7 +272,9 @@ class BaseDAO(Generic[T]):
                 for key, value in values_dict.items():
                     setattr(existing, key, value)
                 await session.flush()
-                logger.info(f"Обновлена существующая запись {cls.model.__name__}")
+                logger.info(
+                    f"Обновлена существующая запись {cls.model.__name__}",
+                )
                 return existing
             else:
                 new_instance = cls.model(**values_dict)
@@ -270,7 +288,11 @@ class BaseDAO(Generic[T]):
             raise
 
     @classmethod
-    async def bulk_update(cls, session: AsyncSession, records: list[BaseModel]) -> int:
+    async def bulk_update(
+        cls,
+        session: AsyncSession,
+        records: list[BaseModel],
+    ) -> int:
         logger.info(f"Массовое обновление записей {cls.model.__name__}")
         try:
             updated_count = 0

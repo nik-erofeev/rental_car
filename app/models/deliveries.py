@@ -33,7 +33,10 @@ class Delivery(Base):
         nullable=False,
         default=DeliveryStatus.pending,
     )
-    tracking_number: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    tracking_number: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
     delivered_at: Mapped[datetime | None] = mapped_column(
         TIMESTAMP,
         nullable=True,

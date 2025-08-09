@@ -17,6 +17,10 @@ class CarPhoto(Base):
         index=True,
     )
     url: Mapped[str] = mapped_column(String(512), nullable=False)
-    is_main: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    is_main: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=False,
+    )
 
     car: Mapped["Car"] = relationship("Car", back_populates="photos")

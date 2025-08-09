@@ -45,7 +45,10 @@ class Order(Base):
     __tablename__: str = "orders"  # type: ignore[assignment]
     customer_name: Mapped[str] = mapped_column(String(128), nullable=False)
     customer_phone: Mapped[str] = mapped_column(String(64), nullable=False)
-    customer_email: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    customer_email: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
     user_id: Mapped[int | None] = mapped_column(
         Integer,
         ForeignKey("users.id", ondelete="SET NULL"),

@@ -44,7 +44,10 @@ class Payment(Base):
         SQLEnum(PaymentType, name="payment_type"),
         nullable=False,
     )
-    transaction_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    transaction_id: Mapped[str | None] = mapped_column(
+        String(128),
+        nullable=True,
+    )
     paid_at: Mapped[datetime | None] = mapped_column(
         TIMESTAMP,
         nullable=True,
