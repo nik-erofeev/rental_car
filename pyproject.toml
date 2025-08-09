@@ -22,4 +22,8 @@ dev = [
     "pre-commit>=4.2.0",
 ]
 
+[tool.black]
+line-length = 120
 
+[tool.flake8]
+max-line-length = 120

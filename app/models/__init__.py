@@ -3,3 +3,4 @@
 # todo: сюда импортируем новые модели
 
 from .users import *
+from .cars import *

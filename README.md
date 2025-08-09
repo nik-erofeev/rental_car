@@ -66,8 +66,6 @@ backend/
      ```python
      # app/models/__init__.py
      from .users import *
-     from .pets import *
-     from .notices import *
      ```
    - При добавлении новой модели обязательно добавьте её импорт в этот файл, иначе Alembic не увидит изменения схемы.
 

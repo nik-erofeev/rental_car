@@ -2,22 +2,32 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.dao.users import UsersDAO
-from app.api.users.exceptions import UserNotFoundException, UserAlreadyExistsException
-from app.api.users.schemas import UserBase, UserCreate, UserCreateDb, UserRead, UserIdFilter, UserUpdateDb, \
-    UserListFilter
+from app.api.users.exceptions import (
+    UserNotFoundException,
+    UserAlreadyExistsException,
+)
+from app.api.users.schemas import (
+    UserCreate,
+    UserCreateDb,
+    UserRead,
+    UserIdFilter,
+    UserUpdateDb,
+    UserListFilter,
+)
 
 logger = logging.getLogger(__name__)
 
-async def example_create_user(session: AsyncSession, user: UserCreate) -> UserRead:
+
+async def example_create_user(
+    session: AsyncSession,
+    user: UserCreate,
+) -> UserRead:
     logger.info(f"Создание пользователя: {user}")
     if await UsersDAO.get_by_email(session, user.email):
         logger.warning(f"Пользователь с email={user.email} уже существует")
         raise UserAlreadyExistsException
 
-    user_db = UserCreateDb(
-        ...,
-        is_active=True,
-    )
+    user_db = UserCreateDb(email=user.email, is_active=True)
     user_obj = await UsersDAO.add(session, user_db)
     await session.commit()
     logger.info(f"Пользователь создан: {user_obj}")
@@ -68,7 +78,10 @@ async def example_get_users(
     offset: int = 0,
 ) -> list[UserRead]:
     logger.info(
-        f"Получение списка пользователей: is_active={is_active}, limit={limit}, offset={offset}",
+        "Получение списка пользователей: is_active=%s, limit=%s, offset=%s",
+        is_active,
+        limit,
+        offset,
     )
     page = offset // limit + 1 if limit else 1
     filters = UserListFilter(is_active=is_active)

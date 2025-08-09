@@ -1,19 +1,26 @@
 from datetime import datetime
-
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, EmailStr
+from pydantic.config import ConfigDict
 
 
 class UserBase(BaseModel):
-    pass
+    model_config = ConfigDict(from_attributes=True)
+
 
 class UserCreate(UserBase):
-    pass
+    email: EmailStr
+
 
 class UserRead(UserBase):
-    pass
+    id: int
+    email: EmailStr
+    is_active: bool
+    created_at: datetime
+
 
 class UserCreateDb(UserCreate):
-    is_active: bool
+    is_active: bool = True
+
 
 class UserIdFilter(BaseModel):
     id: int
@@ -27,6 +34,7 @@ class UserUpdateDb(BaseModel):
 class UserListFilter(BaseModel):
     email: EmailStr | None = None
     is_active: bool | None = None
+
 
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
