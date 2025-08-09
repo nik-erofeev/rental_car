@@ -11,6 +11,7 @@ from app.api.reviews.services import (
     list_reviews,
     update_review,
     delete_review,
+    get_review_details,
 )
 
 
@@ -58,6 +59,17 @@ async def list_(
     session: AsyncSession = Depends(get_session_without_commit),
 ):
     return await list_reviews(session, limit, offset, user_id, car_id)
+
+
+@router.get(
+    "/{review_id}/details",
+    response_class=ORJSONResponse,
+)
+async def details(
+    review_id: int,
+    session: AsyncSession = Depends(get_session_without_commit),
+):
+    return await get_review_details(session, review_id)
 
 
 @router.put(

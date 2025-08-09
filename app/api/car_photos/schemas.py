@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 from pydantic.config import ConfigDict
 
@@ -25,3 +26,23 @@ class CarPhotoUpdate(BaseModel):
 
 class CarPhotoIdFilter(BaseModel):
     id: int
+
+
+class CarPhotoDetailsRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+
+    photo: "CarPhotoRead"
+    car: "CarPhotoCarRead"
+
+
+class CarPhotoCarRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+    id: int
+    vin: str
+    make: str
+    model: str
+    year: int
+    price: float
+    status: str
+    created_at: datetime
+    updated_at: datetime

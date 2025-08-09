@@ -11,6 +11,8 @@ from app.api.car_photos.schemas import (
     CarPhotoRead,
     CarPhotoUpdate,
     CarPhotoIdFilter,
+    CarPhotoDetailsRead,
+    CarPhotoCarRead,
 )
 from app.dao.car_photos import CarPhotosDAO
 from app.dao.cars import CarsDAO
@@ -83,3 +85,28 @@ async def delete_car_photo(session: AsyncSession, photo_id: int) -> None:
     if deleted == 0:
         raise CarPhotoNotFoundException
     await session.commit()
+
+
+async def get_car_photo_details(
+    session: AsyncSession,
+    photo_id: int,
+) -> CarPhotoDetailsRead:
+    photo = await CarPhotosDAO.get_with_relations(session, photo_id)
+    if not photo:
+        raise CarPhotoNotFoundException
+
+    car = photo.car
+    return CarPhotoDetailsRead(
+        photo=CarPhotoRead.model_validate(photo),
+        car=CarPhotoCarRead(
+            id=car.id,
+            vin=car.vin,
+            make=car.make,
+            model=car.model,
+            year=car.year,
+            price=car.price,
+            status=car.status,
+            created_at=car.created_at,
+            updated_at=car.updated_at,
+        ),
+    )

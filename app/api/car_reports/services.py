@@ -11,6 +11,8 @@ from app.api.car_reports.schemas import (
     CarReportRead,
     CarReportUpdate,
     CarReportIdFilter,
+    CarReportDetailsRead,
+    CarReportCarRead,
 )
 from app.dao.car_reports import CarReportsDAO
 from app.dao.cars import CarsDAO
@@ -89,3 +91,28 @@ async def delete_car_report(session: AsyncSession, report_id: int) -> None:
     if deleted == 0:
         raise CarReportNotFoundException
     await session.commit()
+
+
+async def get_car_report_details(
+    session: AsyncSession,
+    report_id: int,
+) -> CarReportDetailsRead:
+    report = await CarReportsDAO.get_with_relations(session, report_id)
+    if not report:
+        raise CarReportNotFoundException
+
+    car = report.car
+    return CarReportDetailsRead(
+        report=CarReportRead.model_validate(report),
+        car=CarReportCarRead(
+            id=car.id,
+            vin=car.vin,
+            make=car.make,
+            model=car.model,
+            year=car.year,
+            price=car.price,
+            status=car.status,
+            created_at=car.created_at,
+            updated_at=car.updated_at,
+        ),
+    )

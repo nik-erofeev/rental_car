@@ -15,6 +15,7 @@ from app.api.deliveries.services import (
     list_deliveries,
     update_delivery,
     delete_delivery,
+    get_delivery_details,
 )
 
 
@@ -60,6 +61,17 @@ async def list_(
     session: AsyncSession = Depends(get_session_without_commit),
 ):
     return await list_deliveries(session, limit, offset)
+
+
+@router.get(
+    "/{delivery_id}/details",
+    response_class=ORJSONResponse,
+)
+async def details(
+    delivery_id: int,
+    session: AsyncSession = Depends(get_session_without_commit),
+):
+    return await get_delivery_details(session, delivery_id)
 
 
 @router.put(

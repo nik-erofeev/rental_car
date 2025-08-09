@@ -30,18 +30,28 @@
   - Схема ответа: `OrderDetailsRead`.
   - Роут: `GET /v1/orders/{order_id}/details` (+ curl пример в `example_crud_api.bash`).
  - Добавлена агрегированная ручка авто:
-   - DAO: `CarsDAO.get_with_relations()` со `selectinload` для `photos`, `reports`, `reviews`, `orders`.
-   - Сервис: `get_car_details()`.
-   - Схема ответа: `CarDetailsRead` (локальная `CarOrderRead` для избежания циклов).
-   - Роут: `GET /v1/cars/{car_id}/details` (+ curl пример в `example_crud_api.bash`).
+  - DAO: `CarsDAO.get_with_relations()` со `selectinload` для `photos`, `reports`, `reviews`, `orders`.
+  - Сервис: `get_car_details()`.
+  - Схема ответа: `CarDetailsRead` (локальная `CarOrderRead` для избежания циклов).
+  - Роут: `GET /v1/cars/{car_id}/details` (+ curl пример в `example_crud_api.bash`).
+
+ - Добавлены агрегированные ручки для оставшихся сущностей:
+  - Deliveries: DAO `DeliveriesDAO.get_with_relations()`, сервис `get_delivery_details()`,
+    схема `DeliveryDetailsRead` (вложенные `DeliveryOrder*`), роут `GET /v1/deliveries/{delivery_id}/details`.
+  - Reviews: DAO `ReviewsDAO.get_with_relations()`, сервис `get_review_details()`,
+    схема `ReviewDetailsRead` (вложенные `ReviewUserRead`, `ReviewCarRead`), роут `GET /v1/reviews/{review_id}/details`.
+  - Car Photos: DAO `CarPhotosDAO.get_with_relations()`, сервис `get_car_photo_details()`,
+    схема `CarPhotoDetailsRead` (`CarPhotoCarRead`), роут `GET /v1/car-photos/{photo_id}/details`.
+  - Car Reports: DAO `CarReportsDAO.get_with_relations()`, сервис `get_car_report_details()`,
+    схема `CarReportDetailsRead` (`CarReportCarRead`), роут `GET /v1/car-reports/{report_id}/details`.
+  - Обновлён `example_crud_api.bash` curl-примерами для новых ручек.
 
 ## Фокус сейчас
- - Агрегированные ручки для оставшихся сущностей со связями
-   (`deliveries`, `reviews`, `car_photos`, `car_reports`) + curl.
- - Интеграционные тесты для `users`, `cars`, `orders` и smoke для остальных.
-
-## Далее
  - Глубокие фильтры и полнотекстовый поиск, индексы и оптимизация запросов.
  - Мониторинг/логирование: расширить метрики, структурированные логи.
+
+## Далее
+ - Интеграционные тесты для `users`, `cars`, `orders` и smoke для
+   `payments`, `deliveries`, `reviews`, `car_photos`, `car_reports` (при необходимости в дальнейшем).
  - Авторизация/безопасность (JWT/OAuth2, роли по `users.role`) (при необходимости в дальнейшем).
  - Докер/CI: прогон тестов и линтеров в пайплайне, сидинг демо-данных (при необходимости в дальнейшем).

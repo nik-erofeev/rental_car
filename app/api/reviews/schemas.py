@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel, Field
 from pydantic.config import ConfigDict
 
@@ -31,3 +33,32 @@ class ReviewUpdate(BaseModel):
 
 class ReviewIdFilter(BaseModel):
     id: int
+
+
+class ReviewDetailsRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+
+    review: "ReviewRead"
+    user: Optional["ReviewUserRead"] = None
+    car: "ReviewCarRead"
+
+
+class ReviewUserRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    email: str
+    is_active: bool
+    created_at: datetime
+
+
+class ReviewCarRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+    id: int
+    vin: str
+    make: str
+    model: str
+    year: int
+    price: float
+    status: str
+    created_at: datetime
+    updated_at: datetime

@@ -15,6 +15,7 @@ from app.api.car_reports.services import (
     list_car_reports,
     update_car_report,
     delete_car_report,
+    get_car_report_details,
 )
 
 
@@ -61,6 +62,17 @@ async def list_(
     session: AsyncSession = Depends(get_session_without_commit),
 ):
     return await list_car_reports(session, car_id, limit, offset)
+
+
+@router.get(
+    "/{report_id}/details",
+    response_class=ORJSONResponse,
+)
+async def details(
+    report_id: int,
+    session: AsyncSession = Depends(get_session_without_commit),
+):
+    return await get_car_report_details(session, report_id)
 
 
 @router.put(

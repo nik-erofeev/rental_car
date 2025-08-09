@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 from pydantic.config import ConfigDict
 from app.models.car_reports import ReportType
@@ -26,3 +27,23 @@ class CarReportUpdate(BaseModel):
 
 class CarReportIdFilter(BaseModel):
     id: int
+
+
+class CarReportDetailsRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+
+    report: "CarReportRead"
+    car: "CarReportCarRead"
+
+
+class CarReportCarRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True, use_enum_values=True)
+    id: int
+    vin: str
+    make: str
+    model: str
+    year: int
+    price: float
+    status: str
+    created_at: datetime
+    updated_at: datetime

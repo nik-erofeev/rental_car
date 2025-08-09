@@ -149,6 +149,9 @@ curl -X POST "http://localhost:8000/v1/deliveries/" \
 # Получить по ID
 curl "http://localhost:8000/v1/deliveries/1"
 
+# Детали (связанный заказ с user, car, payments)
+curl "http://localhost:8000/v1/deliveries/1/details"
+
 # Список
 curl "http://localhost:8000/v1/deliveries/?limit=10&offset=0"
 
@@ -176,6 +179,9 @@ curl -X POST "http://localhost:8000/v1/reviews/" \
 # Получить по ID
 curl "http://localhost:8000/v1/reviews/1"
 
+# Детали (user, car)
+curl "http://localhost:8000/v1/reviews/1/details"
+
 # Список (по car_id)
 curl "http://localhost:8000/v1/reviews/?car_id=1&limit=10&offset=0"
 
@@ -201,6 +207,9 @@ curl -X POST "http://localhost:8000/v1/car-photos/" \
 # Получить по ID
 curl "http://localhost:8000/v1/car-photos/1"
 
+# Детали (car)
+curl "http://localhost:8000/v1/car-photos/1/details"
+
 # Список по car_id
 curl "http://localhost:8000/v1/car-photos/?car_id=1&limit=10&offset=0"
 
@@ -225,6 +234,9 @@ curl -X POST "http://localhost:8000/v1/car-reports/" \
 
 # Получить по ID
 curl "http://localhost:8000/v1/car-reports/1"
+
+# Детали (car)
+curl "http://localhost:8000/v1/car-reports/1/details"
 
 # Список по car_id
 curl "http://localhost:8000/v1/car-reports/?car_id=1&limit=10&offset=0"

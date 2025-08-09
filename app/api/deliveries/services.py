@@ -11,9 +11,15 @@ from app.api.deliveries.schemas import (
     DeliveryRead,
     DeliveryUpdate,
     DeliveryIdFilter,
+    DeliveryDetailsRead,
+    DeliveryOrderRead,
+    DeliveryOrderUserRead,
+    DeliveryOrderCarRead,
+    DeliveryOrderPaymentRead,
 )
 from app.dao.deliveries import DeliveriesDAO
 from app.dao.orders import OrdersDAO
+from app.models.users import User
 
 
 logger = logging.getLogger(__name__)
@@ -31,7 +37,10 @@ async def create_delivery(
     return DeliveryRead.model_validate(delivery)
 
 
-async def get_delivery(session: AsyncSession, delivery_id: int) -> DeliveryRead:
+async def get_delivery(
+    session: AsyncSession,
+    delivery_id: int,
+) -> DeliveryRead:
     delivery = await DeliveriesDAO.find_one_or_none_by_id(delivery_id, session)
     if not delivery:
         raise DeliveryNotFoundException
@@ -80,3 +89,66 @@ async def delete_delivery(session: AsyncSession, delivery_id: int) -> None:
     if deleted == 0:
         raise DeliveryNotFoundException
     await session.commit()
+
+
+async def get_delivery_details(
+    session: AsyncSession,
+    delivery_id: int,
+) -> DeliveryDetailsRead:
+    delivery = await DeliveriesDAO.get_with_relations(session, delivery_id)
+    if not delivery:
+        raise DeliveryNotFoundException
+
+    order = delivery.order
+
+    order_user: User | None = None
+    order_user = order.user if order.user is not None else None
+
+    result = DeliveryDetailsRead(
+        delivery=DeliveryRead.model_validate(delivery),
+        order=DeliveryOrderRead(
+            id=order.id,
+            customer_name=order.customer_name,
+            user_id=order.user_id,
+            car_id=order.car_id,
+            status=order.status,
+            payment_method=order.payment_method,
+            total_amount=order.total_amount,
+            created_at=order.created_at,
+            updated_at=order.updated_at,
+            user=(
+                None
+                if order_user is None
+                else DeliveryOrderUserRead(
+                    id=order_user.id,
+                    email=order_user.email,
+                    is_active=order_user.is_active,
+                    created_at=order_user.created_at,
+                )
+            ),
+            car=DeliveryOrderCarRead(
+                id=order.car.id,
+                vin=order.car.vin,
+                make=order.car.make,
+                model=order.car.model,
+                year=order.car.year,
+                price=order.car.price,
+                status=order.car.status,
+                created_at=order.car.created_at,
+                updated_at=order.car.updated_at,
+            ),
+            payments=[
+                DeliveryOrderPaymentRead(
+                    id=p.id,
+                    amount=p.amount,
+                    status=p.status,
+                    payment_type=p.payment_type,
+                    transaction_id=p.transaction_id,
+                    paid_at=p.paid_at,
+                    created_at=p.created_at,
+                )
+                for p in order.payments
+            ],
+        ),
+    )
+    return result

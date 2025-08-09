@@ -15,6 +15,7 @@ from app.api.car_photos.services import (
     list_car_photos,
     update_car_photo,
     delete_car_photo,
+    get_car_photo_details,
 )
 
 
@@ -61,6 +62,17 @@ async def list_(
     session: AsyncSession = Depends(get_session_without_commit),
 ):
     return await list_car_photos(session, car_id, limit, offset)
+
+
+@router.get(
+    "/{photo_id}/details",
+    response_class=ORJSONResponse,
+)
+async def details(
+    photo_id: int,
+    session: AsyncSession = Depends(get_session_without_commit),
+):
+    return await get_car_photo_details(session, photo_id)
 
 
 @router.put(
