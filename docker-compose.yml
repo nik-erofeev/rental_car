@@ -1,0 +1,48 @@
+services:
+  postgres:
+    container_name: ${DOCKER_NAME}_postgres
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB__USER}
+      POSTGRES_PASSWORD: ${DB__PASSWORD}
+      POSTGRES_DB: ${DB__NAME}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - custom
+    ports:
+      - "15432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB__USER} -d ${DB__NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+#  backend:
+#    container_name: ${DOCKER_NAME}_api
+#    build:
+#      context: .
+#    restart: unless-stopped
+#    command: ["/app/docker/app.sh"]   #  можно указать dockerfile
+#    ports:
+#      - "8000:8000"
+#    depends_on:
+#      - postgres
+#    env_file:
+#      - .env
+#    networks:
+#      - custom
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://localhost:8000/check_database" ]
+#      interval: 30s
+#      timeout: 5s
+#      retries: 3
+
+volumes:
+  db_data:
+
+
+networks:
+  custom:
+    driver: bridge
