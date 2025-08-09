@@ -30,11 +30,15 @@ async def create_delivery(
     session: AsyncSession,
     data: DeliveryCreate,
 ) -> DeliveryRead:
+    logger.info("[deliveries] Создание доставки: %s", data)
     # Проверка, что заказ существует
     if not await OrdersDAO.find_one_or_none_by_id(data.order_id, session):
+        logger.warning("[deliveries] Заказ не найден для доставки order_id=%s",
+                       data.order_id)
         raise OrderNotFoundForDeliveryException
     delivery = await DeliveriesDAO.add(session, data)
     await session.commit()
+    logger.info("[deliveries] Доставка создана id=%s", delivery.id)
     return DeliveryRead.model_validate(delivery)
 
 
@@ -42,8 +46,10 @@ async def get_delivery(
     session: AsyncSession,
     delivery_id: int,
 ) -> DeliveryRead:
+    logger.info("[deliveries] Получение доставки id=%s", delivery_id)
     delivery = await DeliveriesDAO.find_one_or_none_by_id(delivery_id, session)
     if not delivery:
+        logger.warning("[deliveries] Доставка не найдена id=%s", delivery_id)
         raise DeliveryNotFoundException
     return DeliveryRead.model_validate(delivery)
 
@@ -56,6 +62,8 @@ async def list_deliveries(
     status: str | None = None,
     q: str | None = None,
 ) -> list[DeliveryRead]:
+    logger.info("[deliveries] Список доставок: limit=%s offset=%s order_id=%s",
+                limit, offset, order_id)
     items = await DeliveriesDAO.find_filtered(
         session,
         order_id=order_id,
@@ -65,8 +73,11 @@ async def list_deliveries(
         offset=offset,
     )
     if not items:
+        logger.info("[deliveries] По фильтрам доставки не найдены")
         raise DeliveriesNotFoundByFiltersException
-    return [DeliveryRead.model_validate(i) for i in items]
+    result = [DeliveryRead.model_validate(i) for i in items]
+    logger.info("[deliveries] Найдено доставок: %s", len(result))
+    return result
 
 
 async def update_delivery(
@@ -74,8 +85,10 @@ async def update_delivery(
     delivery_id: int,
     data: DeliveryUpdate,
 ) -> DeliveryRead:
+    logger.info("[deliveries] Обновление доставки id=%s", delivery_id)
     values = data.model_dump(exclude_unset=True)
     if not values:
+        logger.info("[deliveries] Обновление без изменений id=%s", delivery_id)
         return await get_delivery(session, delivery_id)
     updated = await DeliveriesDAO.update(
         session,
@@ -83,27 +96,43 @@ async def update_delivery(
         data,
     )
     if updated == 0:
+        logger.warning(
+            "[deliveries] Доставка не найдена для обновления id=%s",
+            delivery_id,
+        )
         raise DeliveryNotFoundException
     delivery = await DeliveriesDAO.find_one_or_none_by_id(delivery_id, session)
+    logger.info("[deliveries] Доставка обновлена id=%s", delivery_id)
     return DeliveryRead.model_validate(delivery)
 
 
 async def delete_delivery(session: AsyncSession, delivery_id: int) -> None:
+    logger.info("[deliveries] Удаление доставки id=%s", delivery_id)
     deleted = await DeliveriesDAO.delete(
         session,
         DeliveryIdFilter(id=delivery_id),
     )
     if deleted == 0:
+        logger.warning(
+            "[deliveries] Доставка не найдена для удаления id=%s",
+            delivery_id,
+        )
         raise DeliveryNotFoundException
     await session.commit()
+    logger.info("[deliveries] Доставка удалена id=%s", delivery_id)
 
 
 async def get_delivery_details(
     session: AsyncSession,
     delivery_id: int,
 ) -> DeliveryDetailsRead:
+    logger.info("[deliveries] Детали доставки id=%s", delivery_id)
     delivery = await DeliveriesDAO.get_with_relations(session, delivery_id)
     if not delivery:
+        logger.warning(
+            "[deliveries] Доставка не найдена для деталей id=%s",
+            delivery_id,
+        )
         raise DeliveryNotFoundException
 
     order = delivery.order
@@ -158,4 +187,5 @@ async def get_delivery_details(
             ],
         ),
     )
+    logger.info("[deliveries] Детали доставки собраны id=%s", delivery_id)
     return result

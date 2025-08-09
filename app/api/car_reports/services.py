@@ -25,10 +25,16 @@ async def create_car_report(
     session: AsyncSession,
     data: CarReportCreate,
 ) -> CarReportRead:
+    logger.info("[car_reports] Создание отчёта: %s", data)
     if not await CarsDAO.find_one_or_none_by_id(data.car_id, session):
+        logger.warning(
+            "[car_reports] Авто не найдено для отчёта car_id=%s",
+            data.car_id,
+        )
         raise CarNotFoundForReportException
     report = await CarReportsDAO.add(session, data)
     await session.commit()
+    logger.info("[car_reports] Отчёт создан id=%s", report.id)
     return CarReportRead.model_validate(report)
 
 
@@ -36,8 +42,10 @@ async def get_car_report(
     session: AsyncSession,
     report_id: int,
 ) -> CarReportRead:
+    logger.info("[car_reports] Получение отчёта id=%s", report_id)
     report = await CarReportsDAO.find_one_or_none_by_id(report_id, session)
     if not report:
+        logger.warning("[car_reports] Отчёт не найден id=%s", report_id)
         raise CarReportNotFoundException
     return CarReportRead.model_validate(report)
 
@@ -48,12 +56,20 @@ async def list_car_reports(
     limit: int = 20,
     offset: int = 0,
 ) -> list[CarReportRead]:
+    logger.info(
+        "[car_reports] Список отчётов: car_id=%s limit=%s offset=%s",
+        car_id,
+        limit,
+        offset,
+    )
     if car_id is not None:
         items = await CarReportsDAO.find_by_car(session, car_id)
-        return [
+        result = [
             CarReportRead.model_validate(i)
             for i in items[offset : offset + limit]
         ]
+        logger.info("[car_reports] Найдено отчётов: %s", len(result))
+        return result
     page = offset // limit + 1 if limit else 1
     items = await CarReportsDAO.paginate(
         session,
@@ -61,7 +77,9 @@ async def list_car_reports(
         page_size=limit,
         filters=None,
     )
-    return [CarReportRead.model_validate(i) for i in items]
+    result = [CarReportRead.model_validate(i) for i in items]
+    logger.info("[car_reports] Найдено отчётов: %s", len(result))
+    return result
 
 
 async def update_car_report(
@@ -69,8 +87,10 @@ async def update_car_report(
     report_id: int,
     data: CarReportUpdate,
 ) -> CarReportRead:
+    logger.info("[car_reports] Обновление отчёта id=%s", report_id)
     values = data.model_dump(exclude_unset=True)
     if not values:
+        logger.info("[car_reports] Обновление без изменений id=%s", report_id)
         return await get_car_report(session, report_id)
     updated = await CarReportsDAO.update(
         session,
@@ -78,31 +98,47 @@ async def update_car_report(
         data,
     )
     if updated == 0:
+        logger.warning(
+            "[car_reports] Отчёт не найден для обновления id=%s",
+            report_id,
+        )
         raise CarReportNotFoundException
     report = await CarReportsDAO.find_one_or_none_by_id(report_id, session)
+    logger.info("[car_reports] Отчёт обновлён id=%s", report_id)
     return CarReportRead.model_validate(report)
 
 
 async def delete_car_report(session: AsyncSession, report_id: int) -> None:
+    logger.info("[car_reports] Удаление отчёта id=%s", report_id)
     deleted = await CarReportsDAO.delete(
         session,
         CarReportIdFilter(id=report_id),
     )
     if deleted == 0:
+        logger.warning(
+            "[car_reports] Отчёт не найден для удаления id=%s",
+            report_id,
+        )
         raise CarReportNotFoundException
     await session.commit()
+    logger.info("[car_reports] Отчёт удалён id=%s", report_id)
 
 
 async def get_car_report_details(
     session: AsyncSession,
     report_id: int,
 ) -> CarReportDetailsRead:
+    logger.info("[car_reports] Детали отчёта id=%s", report_id)
     report = await CarReportsDAO.get_with_relations(session, report_id)
     if not report:
+        logger.warning(
+            "[car_reports] Отчёт не найден для деталей id=%s",
+            report_id,
+        )
         raise CarReportNotFoundException
 
     car = report.car
-    return CarReportDetailsRead(
+    result = CarReportDetailsRead(
         report=CarReportRead.model_validate(report),
         car=CarReportCarRead(
             id=car.id,
@@ -116,3 +152,5 @@ async def get_car_report_details(
             updated_at=car.updated_at,
         ),
     )
+    logger.info("[car_reports] Детали отчёта собраны id=%s", report_id)
+    return result

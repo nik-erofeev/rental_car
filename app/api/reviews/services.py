@@ -29,23 +29,31 @@ async def create_review(
     session: AsyncSession,
     data: ReviewCreate,
 ) -> ReviewRead:
+    logger.info("[reviews] Создание отзыва: %s", data)
     # FK проверки
     if not await CarsDAO.find_one_or_none_by_id(data.car_id, session):
+        logger.warning("[reviews] Авто не найдено для отзыва car_id=%s",
+                       data.car_id)
         raise CarNotFoundForReviewException
     if data.user_id is not None and not await UsersDAO.find_one_or_none_by_id(
         data.user_id,
         session,
     ):
+        logger.warning("[reviews] Пользователь не найден user_id=%s",
+                       data.user_id)
         raise UserNotFoundForReviewException
 
     review = await ReviewsDAO.add(session, data)
     await session.commit()
+    logger.info("[reviews] Отзыв создан id=%s", review.id)
     return ReviewRead.model_validate(review)
 
 
 async def get_review(session: AsyncSession, review_id: int) -> ReviewRead:
+    logger.info("[reviews] Получение отзыва id=%s", review_id)
     review = await ReviewsDAO.find_one_or_none_by_id(review_id, session)
     if not review:
+        logger.warning("[reviews] Отзыв не найден id=%s", review_id)
         raise ReviewNotFoundException
     return ReviewRead.model_validate(review)
 
@@ -60,6 +68,13 @@ async def list_reviews(
     rating_max: int | None = None,
     q: str | None = None,
 ) -> list[ReviewRead]:
+    logger.info(
+        "[reviews] Список отзывов: limit=%s offset=%s user_id=%s car_id=%s",
+        limit,
+        offset,
+        user_id,
+        car_id,
+    )
     items = await ReviewsDAO.find_filtered(
         session,
         user_id=user_id,
@@ -71,8 +86,11 @@ async def list_reviews(
         offset=offset,
     )
     if not items:
+        logger.info("[reviews] По фильтрам отзывы не найдены")
         raise ReviewsNotFoundByFiltersException
-    return [ReviewRead.model_validate(i) for i in items]
+    result = [ReviewRead.model_validate(i) for i in items]
+    logger.info("[reviews] Найдено отзывов: %s", len(result))
+    return result
 
 
 async def update_review(
@@ -80,8 +98,10 @@ async def update_review(
     review_id: int,
     data: ReviewUpdate,
 ) -> ReviewRead:
+    logger.info("[reviews] Обновление отзыва id=%s", review_id)
     values = data.model_dump(exclude_unset=True)
     if not values:
+        logger.info("[reviews] Обновление без изменений id=%s", review_id)
         return await get_review(session, review_id)
     updated = await ReviewsDAO.update(
         session,
@@ -89,30 +109,46 @@ async def update_review(
         data,
     )
     if updated == 0:
+        logger.warning(
+            "[reviews] Отзыв не найден для обновления id=%s",
+            review_id,
+        )
         raise ReviewNotFoundException
     review = await ReviewsDAO.find_one_or_none_by_id(review_id, session)
+    logger.info("[reviews] Отзыв обновлён id=%s", review_id)
     return ReviewRead.model_validate(review)
 
 
 async def delete_review(session: AsyncSession, review_id: int) -> None:
+    logger.info("[reviews] Удаление отзыва id=%s", review_id)
     deleted = await ReviewsDAO.delete(session, ReviewIdFilter(id=review_id))
     if deleted == 0:
+        logger.warning(
+            "[reviews] Отзыв не найден для удаления id=%s",
+            review_id,
+        )
         raise ReviewNotFoundException
     await session.commit()
+    logger.info("[reviews] Отзыв удалён id=%s", review_id)
 
 
 async def get_review_details(
     session: AsyncSession,
     review_id: int,
 ) -> ReviewDetailsRead:
+    logger.info("[reviews] Детали отзыва id=%s", review_id)
     review = await ReviewsDAO.get_with_relations(session, review_id)
     if not review:
+        logger.warning(
+            "[reviews] Отзыв не найден для деталей id=%s",
+            review_id,
+        )
         raise ReviewNotFoundException
 
     user = review.user
     car = review.car
 
-    return ReviewDetailsRead(
+    result = ReviewDetailsRead(
         review=ReviewRead.model_validate(review),
         user=(
             None
@@ -136,3 +172,5 @@ async def get_review_details(
             updated_at=car.updated_at,
         ),
     )
+    logger.info("[reviews] Детали отзыва собраны id=%s", review_id)
+    return result

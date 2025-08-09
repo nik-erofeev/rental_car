@@ -20,18 +20,21 @@ logger = logging.getLogger(__name__)
 
 
 async def create_car(session: AsyncSession, data: CarCreate) -> CarRead:
-    logger.info("Создание авто: %s", data)
+    logger.info("[cars] Создание авто: %s", data)
     if await CarsDAO.get_by_vin(session, data.vin):
-        # Простая проверка уникальности VIN
+        logger.warning("[cars] VIN уже существует: %s", data.vin)
         raise CarAlreadyExistsException
     car = await CarsDAO.add(session, data)
     await session.commit()
+    logger.info("[cars] Создано авто id=%s", car.id)
     return CarRead.model_validate(car)
 
 
 async def get_car(session: AsyncSession, car_id: int) -> CarRead:
+    logger.info("[cars] Получение авто id=%s", car_id)
     car = await CarsDAO.find_one_or_none_by_id(car_id, session)
     if not car:
+        logger.warning("[cars] Авто не найдено id=%s", car_id)
         raise CarNotFoundException
     return CarRead.model_validate(car)
 
@@ -51,6 +54,13 @@ async def list_cars(
     sort_by: str | None = None,
     sort_dir: str | None = "desc",
 ) -> list[CarRead]:
+    logger.info(
+        "[cars] Список авто: limit=%s offset=%s make=%s model=%s",
+        limit,
+        offset,
+        make,
+        model,
+    )
     # offset/limit используются напрямую в DAO
     cars = await CarsDAO.find_filtered(
         session,
@@ -68,8 +78,11 @@ async def list_cars(
         offset=offset,
     )
     if not cars:
+        logger.info("[cars] По фильтрам авто не найдены")
         raise CarsNotFoundByFiltersException
-    return [CarRead.model_validate(c) for c in cars]
+    result = [CarRead.model_validate(c) for c in cars]
+    logger.info("[cars] Найдено авто: %s", len(result))
+    return result
 
 
 async def update_car(
@@ -77,8 +90,10 @@ async def update_car(
     car_id: int,
     data: CarUpdate,
 ) -> CarRead:
+    logger.info("[cars] Обновление авто id=%s", car_id)
     values = data.model_dump(exclude_unset=True)
     if not values:
+        logger.info("[cars] Обновление без изменений id=%s", car_id)
         return await get_car(session, car_id)
     updated = await CarsDAO.update(
         session,
@@ -86,16 +101,21 @@ async def update_car(
         data,
     )
     if updated == 0:
+        logger.warning("[cars] Авто не найдено для обновления id=%s", car_id)
         raise CarNotFoundException
     car = await CarsDAO.find_one_or_none_by_id(car_id, session)
+    logger.info("[cars] Авто обновлено id=%s", car_id)
     return CarRead.model_validate(car)
 
 
 async def delete_car(session: AsyncSession, car_id: int) -> None:
+    logger.info("[cars] Удаление авто id=%s", car_id)
     deleted = await CarsDAO.delete(session, CarIdFilter(id=car_id))
     if deleted == 0:
+        logger.warning("[cars] Авто не найдено для удаления id=%s", car_id)
         raise CarNotFoundException
     await session.commit()
+    logger.info("[cars] Авто удалено id=%s", car_id)
 
 
 async def get_car_details(
@@ -103,8 +123,10 @@ async def get_car_details(
     car_id: int,
 ) -> CarDetailsRead:
     """Вернуть авто и связанные сущности: photos, reports, reviews, orders."""
+    logger.info("[cars] Детали авто id=%s", car_id)
     car = await CarsDAO.get_with_relations(session, car_id)
     if not car:
+        logger.warning("[cars] Авто не найдено для деталей id=%s", car_id)
         raise CarNotFoundException
 
     # Избегаем циклических импортов при валидации
@@ -113,10 +135,12 @@ async def get_car_details(
     from app.api.reviews.schemas import ReviewRead  # noqa: WPS433
     from app.api.cars.schemas import CarOrderRead  # noqa: WPS433
 
-    return CarDetailsRead(
+    details = CarDetailsRead(
         car=CarRead.model_validate(car),
         photos=[CarPhotoRead.model_validate(p) for p in car.photos],
         reports=[CarReportRead.model_validate(r) for r in car.reports],
         reviews=[ReviewRead.model_validate(rv) for rv in car.reviews],
         orders=[CarOrderRead.model_validate(o) for o in car.orders],
     )
+    logger.info("[cars] Детали авто собраны id=%s", car_id)
+    return details

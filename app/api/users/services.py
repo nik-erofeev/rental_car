@@ -28,23 +28,26 @@ async def example_create_user(
     session: AsyncSession,
     user: UserCreate,
 ) -> UserRead:
-    logger.info(f"Создание пользователя: {user}")
+    logger.info("[users] Создание пользователя: %s", user)
     if await UsersDAO.get_by_email(session, user.email):
-        logger.warning(f"Пользователь с email={user.email} уже существует")
+        logger.warning(
+            "[users] Пользователь уже существует email=%s",
+            user.email,
+        )
         raise UserAlreadyExistsException
 
     user_db = UserCreateDb(email=user.email, is_active=True)
     user_obj = await UsersDAO.add(session, user_db)
     await session.commit()
-    logger.info(f"Пользователь создан: {user_obj}")
+    logger.info("[users] Пользователь создан id=%s", user_obj.id)
     return UserRead.model_validate(user_obj)
 
 
 async def example_get_user(session: AsyncSession, user_id: int) -> UserRead:
-    logger.info(f"Получение пользователя по id={user_id}")
+    logger.info("[users] Получение пользователя id=%s", user_id)
     user = await UsersDAO.find_one_or_none_by_id(user_id, session)
     if not user:
-        logger.warning(f"Пользователь с id={user_id} не найден")
+        logger.warning("[users] Пользователь не найден id=%s", user_id)
         raise UserNotFoundException
     return UserRead.model_validate(user)
 
@@ -54,27 +57,40 @@ async def example_update_user(
     user_id: int,
     user_update,
 ) -> UserRead:
-    logger.info(f"Обновление пользователя id={user_id} данными: {user_update}")
+    logger.info(
+        "[users] Обновление пользователя id=%s данными: %s",
+        user_id,
+        user_update,
+    )
     filter_obj = UserIdFilter(id=user_id)
     values_obj = UserUpdateDb(**user_update.model_dump(exclude_unset=True))
     updated = await UsersDAO.update(session, filter_obj, values_obj)
     if updated == 0:
-        logger.warning(f"Пользователь с id={user_id} не найден для обновления")
+        logger.warning(
+            "[users] Пользователь не найден для обновления id=%s",
+            user_id,
+        )
         raise UserNotFoundException
     user = await UsersDAO.find_one_or_none_by_id(user_id, session)
-    logger.info(f"Пользователь обновлён: {user}")
+    logger.info(
+        "[users] Пользователь обновлён id=%s",
+        user.id if user is not None else "unknown",
+    )
     return UserRead.model_validate(user)
 
 
 async def example_delete_user(session: AsyncSession, user_id: int) -> None:
-    logger.info(f"Удаление пользователя id={user_id}")
+    logger.info("[users] Удаление пользователя id=%s", user_id)
     filter_obj = UserIdFilter(id=user_id)
     deleted = await UsersDAO.delete(session, filter_obj)
     if deleted == 0:
-        logger.warning(f"Пользователь с id={user_id} не найден для удаления")
+        logger.warning(
+            "[users] Пользователь не найден для удаления id=%s",
+            user_id,
+        )
         raise UserNotFoundException
     await session.commit()
-    logger.info(f"Пользователь id={user_id} удалён")
+    logger.info("[users] Пользователь удалён id=%s", user_id)
 
 
 async def example_get_users(
@@ -84,7 +100,7 @@ async def example_get_users(
     offset: int = 0,
 ) -> list[UserRead]:
     logger.info(
-        "Получение списка пользователей: is_active=%s, limit=%s, offset=%s",
+        "[users] Список пользователей: is_active=%s, limit=%s, offset=%s",
         is_active,
         limit,
         offset,
@@ -97,7 +113,7 @@ async def example_get_users(
         page_size=limit,
         filters=filters,
     )
-    logger.info(f"Найдено пользователей: {len(users)}")
+    logger.info("[users] Найдено пользователей: %s", len(users))
     return [UserRead.model_validate(user) for user in users]
 
 
@@ -109,8 +125,13 @@ async def get_user_profile(
 
     Содержит данные пользователя, его заказы и его отзывы.
     """
+    logger.info("[users] Профиль пользователя id=%s", user_id)
     user = await UsersDAO.get_with_relations(session, user_id)
     if not user:
+        logger.warning(
+            "[users] Пользователь не найден для профиля id=%s",
+            user_id,
+        )
         raise UserNotFoundException
 
     # Используем загруженные связи вместо дополнительных запросов
@@ -118,9 +139,17 @@ async def get_user_profile(
     reviews = list(user.reviews)
     cars = [o.car for o in orders if o.car]
 
-    return UserProfileRead(
+    result = UserProfileRead(
         user=UserRead.model_validate(user),
         orders=[OrderRead.model_validate(o) for o in orders],
         reviews=[ReviewRead.model_validate(r) for r in reviews],
         cars=[CarRead.model_validate(c) for c in cars],
     )
+    logger.info(
+        "[users] Профиль собран id=%s: orders=%s reviews=%s cars=%s",
+        user_id,
+        len(orders),
+        len(reviews),
+        len(cars),
+    )
+    return result
