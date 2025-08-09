@@ -19,3 +19,10 @@
    /Users/Nik/Desktop/my_test_project/rental_car/.venv/bin/alembic revision --autogenerate -m "Описание изменений"
    /Users/Nik/Desktop/my_test_project/rental_car/.venv/bin/alembic upgrade head
    ```
+
+## Линтеры и pre-commit
+- При правках линтов запускать pre-commit для всего репозитория:
+  ```bash
+  source .venv/bin/activate && pre-commit run --all-files
+  ```
+  Это гарантирует единый стиль кода и автоматические фиксы (форматирование, импорты и т.п.).

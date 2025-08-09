@@ -125,7 +125,9 @@ class BaseDAO(Generic[T]):
         session: AsyncSession,
         instances: Sequence[BaseModel],
     ) -> list[T]:
-        values_list = [item.model_dump(exclude_unset=True) for item in instances]
+        values_list = [
+            item.model_dump(exclude_unset=True) for item in instances
+        ]
         logger.info(
             f"Добавление нескольких записей {cls.model.__name__}. Количество: {len(values_list)}",
         )
@@ -216,7 +218,9 @@ class BaseDAO(Generic[T]):
         filters: BaseModel | None = None,
     ) -> list[T]:
         filter_dict = (
-            filters.model_dump(exclude_unset=True, exclude_none=True) if filters else {}
+            filters.model_dump(exclude_unset=True, exclude_none=True)
+            if filters
+            else {}
         )
         logger.info(
             f"Пагинация записей {cls.model.__name__} по фильтру: {filter_dict}, страница: {page}, размер страницы: {page_size}",
@@ -259,7 +263,9 @@ class BaseDAO(Generic[T]):
     ) -> T:
         values_dict = values.model_dump(exclude_unset=True)
         filter_dict = {
-            field: values_dict[field] for field in unique_fields if field in values_dict
+            field: values_dict[field]
+            for field in unique_fields
+            if field in values_dict
         }
 
         logger.info(f"Upsert для {cls.model.__name__}")
@@ -301,7 +307,9 @@ class BaseDAO(Generic[T]):
                 if "id" not in record_dict:
                     continue
 
-                update_data = {k: v for k, v in record_dict.items() if k != "id"}
+                update_data = {
+                    k: v for k, v in record_dict.items() if k != "id"
+                }
                 stmt = (
                     sqlalchemy_update(cls.model)
                     .filter_by(id=record_dict["id"])

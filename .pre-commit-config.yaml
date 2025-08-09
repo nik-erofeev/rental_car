@@ -1,51 +1,63 @@
-exclude: ^.*\b(migrations|docker|grafana-dashboard.json)\b.*$
+exclude: ^.*\b(migrations|docker|grafana-dashboard.json|venv|.venv|env|.env|.cursor)\b.*$
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
-      - id: check-ast
-      - id: check-case-conflict
-      - id: check-json
-      - id: check-toml
-      - id: debug-statements
-      - id: pretty-format-json
+      - id: check-ast             # Python-файлы синтаксически корректны (валидный AST).
+      - id: check-case-conflict   # в репозитории нет файлов, отличающихся только регистром (важно для кроссплатформенности).
+      - id: check-json            # JSON-файлы синтаксически корректны.
+      - id: check-toml            # TOML-файлы синтаксически корректны.
+      - id: debug-statements      # Проверяет, что в коде нет отладочных вызовов (print, pdb.set_trace(), breakpoint()).
+      - id: pretty-format-json    # Автоматически форматирует .json-файлы (автофикс и отступом 4 пробела)
         args: [
           --autofix,
           "--indent", "4",
         ]
-      - id: trailing-whitespace
-      - id: no-commit-to-branch
+      - id: trailing-whitespace  # Удаляет лишние пробелы в конце строк.
+      - id: no-commit-to-branch  # Запрещает коммитить в указанные ветки (! — develop).
         args: [
           --branch, develop,
         ]
 
-  - repo: https://github.com/asottile/add-trailing-comma
+  - repo: https://github.com/asottile/add-trailing-comma  # Добавляет запятую в конце списков, словарей, кортежей, если это возможно
     rev: v3.1.0
     hooks:
       - id: add-trailing-comma
+
+  - repo: https://github.com/psf/black-pre-commit-mirror  # Форматирует код
+    rev: 25.1.0
+    hooks:
+      - id: black
+        language_version: python3.12
+        args: [--line-length=80]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.8.1
     hooks:
       - id: ruff
-        args: [ --fix ]
+#        args: [ --fix ]
+        args: [--fix, --line-length=80] # todo: если задать здесь, а не в pyproject.toml
       - id: ruff-format
+        args: [--line-length=80] # todo: если задать здесь, а не в pyproject.toml
 
-  - repo: https://github.com/asottile/pyupgrade
+  - repo: https://github.com/asottile/pyupgrade  # Переводит код на более современный синтаксис(3.12+)
     rev: v3.19.0
     hooks:
       - id: pyupgrade
         args: [ --py312-plus ]
 
-#  - repo: https://github.com/pycqa/isort
-#    rev: 5.13.2
-#    hooks:
-#    - id: isort
-#      name: isort (python)
+#  # todo: local
 #  - repo: local
 #    hooks:
 #      - id: mypy
-#        name: Run mypy via make
-#        entry: make mypy
+#        name: mypy
+#        entry: mypy
 #        language: system
 #        types: [ python ]
+#        require_serial: true
+#    # todo: repo github
+#  - repo: https://github.com/pre-commit/mirrors-mypy
+#    rev: v1.11.2
+#    hooks:
+#      - id: mypy
+#        additional_dependencies: [ types-requests ]
