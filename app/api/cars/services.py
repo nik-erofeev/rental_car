@@ -1,5 +1,8 @@
 import logging
-
+from app.api.cars.exceptions import (
+    CarNotFoundException,
+    CarAlreadyExistsException,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.cars.schemas import (
@@ -18,7 +21,7 @@ async def create_car(session: AsyncSession, data: CarCreate) -> CarRead:
     logger.info("Создание авто: %s", data)
     if await CarsDAO.get_by_vin(session, data.vin):
         # Простая проверка уникальности VIN
-        raise ValueError("Car with this VIN already exists")
+        raise CarAlreadyExistsException
     car = await CarsDAO.add(session, data)
     await session.commit()
     return CarRead.model_validate(car)
@@ -27,7 +30,7 @@ async def create_car(session: AsyncSession, data: CarCreate) -> CarRead:
 async def get_car(session: AsyncSession, car_id: int) -> CarRead:
     car = await CarsDAO.find_one_or_none_by_id(car_id, session)
     if not car:
-        raise ValueError("Car not found")
+        raise CarNotFoundException
     return CarRead.model_validate(car)
 
 
@@ -60,7 +63,7 @@ async def update_car(
         data,
     )
     if updated == 0:
-        raise ValueError("Car not found")
+        raise CarNotFoundException
     car = await CarsDAO.find_one_or_none_by_id(car_id, session)
     return CarRead.model_validate(car)
 
@@ -68,5 +71,5 @@ async def update_car(
 async def delete_car(session: AsyncSession, car_id: int) -> None:
     deleted = await CarsDAO.delete(session, CarIdFilter(id=car_id))
     if deleted == 0:
-        raise ValueError("Car not found")
+        raise CarNotFoundException
     await session.commit()

@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.settings import AppConfig, APP_CONFIG
 from app.api.users.routers import router as users_router
 from app.api.cars.routers import router as cars_router
+from app.api.orders.routers import router as orders_router
 
 
 from app.api.default.routers import router as default_router
@@ -79,6 +80,7 @@ def create_app(config: AppConfig) -> FastAPI:
     app.include_router(default_router)
     app.include_router(users_router)
     app.include_router(cars_router)
+    app.include_router(orders_router)
 
     @app.exception_handler(Exception)
     async def http_exception_handler(

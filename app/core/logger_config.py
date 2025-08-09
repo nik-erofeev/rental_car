@@ -4,13 +4,13 @@ from colorama import Fore, Style
 
 DEFAULT_LOG_FORMAT = "[%(asctime)s.%(msecs)03d] %(funcName)20s %(module)s:%(lineno)d %(levelname)-8s - %(message)s"  # noqa: E501 : ignore
 
-
-def configure_logging(level: int = logging.INFO) -> None:
-    logging.basicConfig(
-        level=level,
-        datefmt="%Y-%m-%d %H:%M:%S",
-        format=DEFAULT_LOG_FORMAT,
-    )
+#
+# def configure_logging(level: int = logging.INFO) -> None:
+#     logging.basicConfig(
+#         level=level,
+#         datefmt="%Y-%m-%d %H:%M:%S",
+#         format=DEFAULT_LOG_FORMAT,
+#     )
 
 
 class ColoredFormatter(logging.Formatter):
@@ -31,28 +31,27 @@ class ColoredFormatter(logging.Formatter):
         return super().format(record)
 
 
-#
-# def configure_logging(level: int = logging.INFO) -> None:
-#     logging.basicConfig(
-#         level=level,
-#         datefmt="%Y-%m-%d %H:%M:%S",
-#         format=DEFAULT_LOG_FORMAT,
-#     )
-#
-#     logger = logging.getLogger()
-#
-#     if logger.hasHandlers():
-#         logger.handlers.clear()
-#
-#     console_handler = logging.StreamHandler()
-#     console_handler.setFormatter(ColoredFormatter(DEFAULT_LOG_FORMAT))
-#     logger.addHandler(console_handler)
-#
-#     # Применяем к Uvicorn логгерам
-#     uvicorn_loggers = ["uvicorn", "uvicorn.error", "uvicorn.access"]
-#     for name in uvicorn_loggers:
-#         uv_logger = logging.getLogger(name)
-#         uv_logger.handlers.clear()
-#         uv_logger.propagate = True  # Чтобы шли через root
-#         uv_logger.setLevel(level)
-#         uv_logger.addHandler(console_handler)
+def configure_logging(level: int = logging.INFO) -> None:
+    logging.basicConfig(
+        level=level,
+        datefmt="%Y-%m-%d %H:%M:%S",
+        format=DEFAULT_LOG_FORMAT,
+    )
+
+    logger = logging.getLogger()
+
+    if logger.hasHandlers():
+        logger.handlers.clear()
+
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(ColoredFormatter(DEFAULT_LOG_FORMAT))
+    logger.addHandler(console_handler)
+
+    # # Применяем к Uvicorn логгерам
+    # uvicorn_loggers = ["uvicorn", "uvicorn.error", "uvicorn.access"]
+    # for name in uvicorn_loggers:
+    #     uv_logger = logging.getLogger(name)
+    #     uv_logger.handlers.clear()
+    #     uv_logger.propagate = True  # Чтобы шли через root
+    #     uv_logger.setLevel(level)
+    #     uv_logger.addHandler(console_handler)

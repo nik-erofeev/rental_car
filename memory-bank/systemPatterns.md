@@ -29,6 +29,18 @@
 
 ## Pydantic v2
 - Схемы чтения используют `model_config = {from_attributes=True}` для валидации ORM-объектов.
+- Для перечислений используем `use_enum_values=True`, чтобы в API возвращались строковые значения enum.
+- Валидация телефонов для заказов: `+7XXXXXXXXXX` через `@field_validator('customer_phone')`.
+  - В `OrderCreate` — поле обязательно и валидируется.
+  - В `OrderUpdate` — поле опционально; валидатор пропускает `None`.
+
+## Исключения и обработка ошибок
+- Централизованные исключения определены в `app/api/exceptions.py` и используются в сервисах.
+  - Cars: `CarNotFoundException` (404), `CarAlreadyExistsException` (409).
+  - Orders: `OrderNotFoundException` (404), `OrderCarNotFoundException` (404).
+- В сервисах не бросаем `ValueError`; вместо этого поднимаем готовые `HTTPException` из `app.api.exceptions`.
+- Перед созданием зависимых сущностей проверяем наличие FK-объектов (например, `car_id` для `orders`). При отсутствии — 404.
+- Для полей с идентификаторами в схемах указывать ограничения: `gt=0` для `car_id`, `user_id` (если не `None`).
 
 ## Наблюдаемость
 - `prometheus-fastapi-instrumentator` подключён.
