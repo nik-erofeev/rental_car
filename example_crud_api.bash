@@ -20,6 +20,9 @@ curl -X PUT "http://localhost:8000/v1/users/1" \
   -H "Content-Type: application/json" \
   -d '{"email":"new@example.com","is_active":false}'
 
+# Профиль пользователя (агрегировано)
+curl "http://localhost:8000/v1/users/1/profile"
+
 
 # # Удалить
 # curl -X DELETE "http://localhost:8000/v1/users/1"

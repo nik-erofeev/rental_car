@@ -4,13 +4,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.settings import APP_CONFIG
 from app.db import get_session_without_commit
-from app.api.users.schemas import UserCreate, UserRead, UserUpdate
+from app.api.users.schemas import (
+    UserCreate,
+    UserRead,
+    UserUpdate,
+    UserProfileRead,
+)
 from app.api.users.services import (
     example_create_user,
     example_get_user,
     example_get_users,
     example_update_user,
     example_delete_user,
+    get_user_profile,
 )
 
 # Публичный роутер
@@ -23,7 +29,10 @@ router = APIRouter(
 @router.post(
     "/",
     summary="Регистрация нового пользователя",
-    description="Создаёт нового пользователя по email и паролю. Возвращает данные созданного пользователя.",
+    description=(
+        "Создаёт нового пользователя по email и паролю. "
+        "Возвращает данные созданного пользователя."
+    ),
     response_model=UserRead,
     status_code=status.HTTP_201_CREATED,
     response_class=ORJSONResponse,
@@ -38,7 +47,9 @@ async def register_user(
 @router.get(
     "/{user_id}",
     summary="Получить пользователя по ID",
-    description="Возвращает данные пользователя по его уникальному идентификатору.",
+    description=(
+        "Возвращает данные пользователя по его уникальному идентификатору."
+    ),
     response_model=UserRead,
     response_class=ORJSONResponse,
     status_code=status.HTTP_200_OK,
@@ -53,7 +64,10 @@ async def get_user(
 @router.get(
     "/",
     summary="Получить список пользователей",
-    description="Возвращает список пользователей с возможностью фильтрации по  статусу активности, а также с пагинацией.",
+    description=(
+        "Возвращает список пользователей с возможностью фильтрации по "
+        "статусу активности, а также с пагинацией."
+    ),
     response_model=list[UserRead],
     response_class=ORJSONResponse,
     status_code=status.HTTP_200_OK,
@@ -81,7 +95,10 @@ async def get_users(
     "/{user_id}",
     response_model=UserRead,
     summary="Обновить пользователя",
-    description="Обновляет email или статус активности пользователя по его ID. Возвращает обновлённые данные пользователя.",
+    description=(
+        "Обновляет email или статус активности пользователя по его ID. "
+        "Возвращает обновлённые данные пользователя."
+    ),
 )
 async def update_user(
     user_id: int,
@@ -103,3 +120,18 @@ async def delete_user(
 ):
     await example_delete_user(session, user_id)
     return None
+
+
+@router.get(
+    "/{user_id}/profile",
+    summary="Профиль пользователя (агрегировано)",
+    description=("Возвращает пользователя, его заказы,отзывы, авто."),
+    response_model=UserProfileRead,
+    response_class=ORJSONResponse,
+    status_code=status.HTTP_200_OK,
+)
+async def get_user_aggregate_profile(
+    user_id: int,
+    session: AsyncSession = Depends(get_session_without_commit),
+):
+    return await get_user_profile(session, user_id)

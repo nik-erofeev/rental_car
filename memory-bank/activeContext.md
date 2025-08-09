@@ -20,6 +20,10 @@
  - Реализованы CRUD для `car_photos` и `car_reports`: схемы, DAO, сервисы и роуты; роутеры подключены.
  - Исключения для `car_photos` и `car_reports` вынесены в `app/api/car_photos/exceptions.py` и `app/api/car_reports/exceptions.py`.
  - Обновлён `example_crud_api.bash` примерами для всех сущностей.
+- Добавлен агрегированный профиль пользователя:
+  - DAO: `UsersDAO.get_with_relations()` со `selectinload` для `orders.car`, `orders.payments`, `orders.deliveries`, `reviews`.
+  - Сервис: `get_user_profile()` возвращает `user`, `orders`, `reviews`, `cars` (из `orders[].car`).
+  - Роут: `GET /v1/users/{user_id}/profile` (+ curl пример в `example_crud_api.bash`).
 
 ## Фокус сейчас
  - Расширить фильтры/сортировку/пагинацию для `orders` (status, payment_method, диапазоны дат/сумм, сортировка по дате/сумме).
