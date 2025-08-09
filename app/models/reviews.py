@@ -29,5 +29,3 @@ class Review(Base):
 
     car: Mapped["Car"] = relationship("Car", back_populates="reviews")
     user: Mapped["User"] = relationship("User", back_populates="reviews")
-
-

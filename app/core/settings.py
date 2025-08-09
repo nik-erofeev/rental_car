@@ -66,7 +66,6 @@ class AppConfig(BaseSettings):
     # ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     # REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-
     model_config = SettingsConfigDict(
         env_nested_delimiter="__",
         env_file_encoding="utf-8",

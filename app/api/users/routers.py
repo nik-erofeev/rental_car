@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, status, Query
 from fastapi.responses import ORJSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, EmailStr
 
 from app.core.settings import APP_CONFIG
 from app.db import get_session_without_commit
@@ -49,7 +48,6 @@ async def get_user(
     session: AsyncSession = Depends(get_session_without_commit),
 ):
     return await example_get_user(session, user_id)
-
 
 
 @router.get(

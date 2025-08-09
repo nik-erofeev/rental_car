@@ -30,6 +30,7 @@ class ColoredFormatter(logging.Formatter):
             record.msg = f"{self.COLORS[record.levelno]}{record.msg}{Style.RESET_ALL}"
         return super().format(record)
 
+
 #
 # def configure_logging(level: int = logging.INFO) -> None:
 #     logging.basicConfig(
@@ -55,5 +56,3 @@ class ColoredFormatter(logging.Formatter):
 #         uv_logger.propagate = True  # Чтобы шли через root
 #         uv_logger.setLevel(level)
 #         uv_logger.addHandler(console_handler)
-
-

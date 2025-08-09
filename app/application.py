@@ -9,7 +9,6 @@ from app.core.settings import AppConfig, APP_CONFIG
 from app.api.users.routers import router as users_router
 
 
-
 from app.api.default.routers import router as default_router
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -17,7 +16,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 
 
 logger = logging.getLogger(__name__)
-
 
 
 @asynccontextmanager

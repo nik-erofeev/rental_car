@@ -11,12 +11,15 @@ from app.db import Base
 if TYPE_CHECKING:
     from .orders import Order
 
+
 @unique
 class DeliveryStatus(StrEnum):
     pending = "pending"
     in_progress = "in_progress"
     delivered = "delivered"
     failed = "failed"
+
+
 class Delivery(Base):
     __tablename__: str = "deliveries"  # type: ignore[assignment]
     order_id: Mapped[int] = mapped_column(
@@ -37,5 +40,3 @@ class Delivery(Base):
     )
 
     order: Mapped["Order"] = relationship("Order", back_populates="deliveries")
-
-

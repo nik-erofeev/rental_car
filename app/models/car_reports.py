@@ -28,5 +28,3 @@ class CarReport(Base):
     data: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
 
     car: Mapped["Car"] = relationship("Car", back_populates="reports")
-
-

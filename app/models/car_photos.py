@@ -20,4 +20,3 @@ class CarPhoto(Base):
     is_main: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     car: Mapped["Car"] = relationship("Car", back_populates="photos")
-    
