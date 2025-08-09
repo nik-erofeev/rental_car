@@ -56,9 +56,21 @@ async def list_(
     offset: int = Query(0, ge=0),
     user_id: int | None = None,
     car_id: int | None = None,
+    rating_min: int | None = Query(default=None, ge=1, le=5),
+    rating_max: int | None = Query(default=None, ge=1, le=5),
+    q: str | None = Query(default=None, min_length=1, max_length=64),
     session: AsyncSession = Depends(get_session_without_commit),
 ):
-    return await list_reviews(session, limit, offset, user_id, car_id)
+    return await list_reviews(
+        session=session,
+        limit=limit,
+        offset=offset,
+        user_id=user_id,
+        car_id=car_id,
+        rating_min=rating_min,
+        rating_max=rating_max,
+        q=q,
+    )
 
 
 @router.get(

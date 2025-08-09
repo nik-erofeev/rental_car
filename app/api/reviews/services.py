@@ -5,6 +5,7 @@ from app.api.reviews.exceptions import (
     ReviewNotFoundException,
     CarNotFoundForReviewException,
     UserNotFoundForReviewException,
+    ReviewsNotFoundByFiltersException,
 )
 
 from app.api.reviews.schemas import (
@@ -55,24 +56,22 @@ async def list_reviews(
     offset: int = 0,
     user_id: int | None = None,
     car_id: int | None = None,
+    rating_min: int | None = None,
+    rating_max: int | None = None,
+    q: str | None = None,
 ) -> list[ReviewRead]:
-    page = offset // limit + 1 if limit else 1
-    if user_id is not None:
-        items = await ReviewsDAO.find_by_user(session, user_id)
-        return [
-            ReviewRead.model_validate(i) for i in items[offset : offset + limit]
-        ]
-    if car_id is not None:
-        items = await ReviewsDAO.find_by_car(session, car_id)
-        return [
-            ReviewRead.model_validate(i) for i in items[offset : offset + limit]
-        ]
-    items = await ReviewsDAO.paginate(
+    items = await ReviewsDAO.find_filtered(
         session,
-        page=page,
-        page_size=limit,
-        filters=None,
+        user_id=user_id,
+        car_id=car_id,
+        rating_min=rating_min,
+        rating_max=rating_max,
+        q=q,
+        limit=limit,
+        offset=offset,
     )
+    if not items:
+        raise ReviewsNotFoundByFiltersException
     return [ReviewRead.model_validate(i) for i in items]
 
 
