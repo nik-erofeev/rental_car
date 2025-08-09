@@ -1,5 +1,6 @@
+from typing import TYPE_CHECKING
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
 
@@ -7,8 +8,13 @@ from app.db import Base
 #     from . import Pet
 
 
+if TYPE_CHECKING:
+    from .orders import Order
+    from .reviews import Review
+
+
 class User(Base):
-    __tablename__ = "users"
+    __tablename__: str = "users"  # type: ignore[assignment]
     email: Mapped[str] = mapped_column(
         String,
         unique=True,
@@ -20,9 +26,12 @@ class User(Base):
         default=True,
     )
 
-    # pets: Mapped[list["Pet"]] = relationship(
-    #     "Pet",
-    #     back_populates="owner",
-    #     # lazy='joined',
-    #     # если не указаны lazy='joined' и lazy='selectin', то подгружаем
-    # )
+    # relations
+    orders: Mapped[list["Order"]] = relationship(
+        "Order",
+        back_populates="user",
+    )
+    reviews: Mapped[list["Review"]] = relationship(
+        "Review",
+        back_populates="user",
+    )

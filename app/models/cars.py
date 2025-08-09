@@ -1,11 +1,18 @@
 from enum import StrEnum, unique
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, Integer, Text, Numeric, TIMESTAMP, func
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
+
+if TYPE_CHECKING:
+    from .car_photos import CarPhoto
+    from .car_reports import CarReport
+    from .reviews import Review
+    from .orders import Order
 
 
 @unique
@@ -37,7 +44,7 @@ class CarStatus(StrEnum):
 
 
 class Car(Base):
-    __tablename__ = "cars"
+    __tablename__: str = "cars"  # type: ignore[assignment]
     vin: Mapped[str] = mapped_column(
         String(64),
         unique=True,
@@ -72,4 +79,26 @@ class Car(Base):
         TIMESTAMP,
         server_default=func.now(),
         onupdate=func.now(),
+    )
+
+    # relations
+    photos: Mapped[list["CarPhoto"]] = relationship(
+        "CarPhoto",
+        back_populates="car",
+        cascade="all, delete-orphan",
+    )
+    reports: Mapped[list["CarReport"]] = relationship(
+        "CarReport",
+        back_populates="car",
+        cascade="all, delete-orphan",
+    )
+    reviews: Mapped[list["Review"]] = relationship(
+        "Review",
+        back_populates="car",
+        cascade="all, delete-orphan",
+    )
+    orders: Mapped[list["Order"]] = relationship(
+        "Order",
+        back_populates="car",
+        cascade="all, delete-orphan",
     )
