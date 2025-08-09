@@ -125,7 +125,24 @@ backend/
 - Alembic docs: автогенерация, async-движок, шаблон `script.py.mako`, множественные `MetaData`.
 
 ### Упрощённая модель данных (без авторизации)
-1. Автомобили (cars)
+1. Пользователи (users)
+id — PK
+
+email — уникальный
+
+is_active — флаг активности
+
+full_name — полное имя
+
+phone — телефон
+
+role — (customer, manager, admin)
+
+created_at
+
+updated_at
+
+2. Автомобили (cars)
 id — PK
 
 vin — уникальный
@@ -156,7 +173,7 @@ created_at
 
 updated_at
 
-2. Фотографии автомобилей (car_photos)
+3. Фотографии автомобилей (car_photos)
 id — PK
 
 car_id — FK → cars.id
@@ -165,7 +182,7 @@ url — путь к изображению
 
 is_main — флаг главного фото
 
-3. Заказы (orders)
+4. Заказы (orders)
 id — PK
 
 customer_name — имя клиента
@@ -190,7 +207,7 @@ created_at
 
 updated_at
 
-4. Доставка (deliveries)
+5. Доставка (deliveries)
 id — PK
 
 order_id — FK → orders.id
@@ -201,7 +218,7 @@ tracking_number
 
 delivered_at
 
-5. Платежи (payments)
+6. Платежи (payments)
 id — PK
 
 order_id — FK → orders.id
@@ -216,7 +233,7 @@ transaction_id — ID транзакции в платёжной системе
 
 paid_at
 
-6. Отчёты по VIN и диагностике (car_reports)
+7. Отчёты по VIN и диагностике (car_reports)
 id — PK
 
 car_id — FK → cars.id
@@ -227,7 +244,7 @@ data — JSON (результаты проверки)
 
 created_at
 
-7. Отзывы (reviews)
+8. Отзывы (reviews)
 id — PK
 
 customer_name
@@ -248,3 +265,5 @@ cars ───< car_reports
 cars ───< reviews
 cars ───< orders ───< payments
 orders ───< deliveries
+users ───< orders
+users ───< reviews
