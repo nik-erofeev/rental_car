@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # Имя Service. Обычно совпадает с app-меткой/Deployment для простоты
+  name: rental-app-api
+spec:
+  # Тип сервиса:
+  # - ClusterIP   — доступен только внутри кластера (по умолчанию)
+  # - NodePort    — доступ извне через порт на ноде (удобно локально)
+  # - LoadBalancer— внешний балансировщик (в облаках)
+  type: NodePort                    # Для локального кластера (kind/minikube)
+  selector:
+    # Сервис отправляет трафик только на Pod'ы с этими метками
+    app: rental-app-api
+  ports:
+    - name: http
+      port: 80                     # Внешний порт сервиса (клиентский)
+      targetPort: 8000             # Порт приложения в контейнере (целевой) # todo: берем ip (kgp -o wide) и подставляем его в 192.168.99.100:8000
+#      nodePort: 30001              # TODO: ПРОБРАСЫВАЕМ ПОРТ-host(по нему будем  localhost:30001 обращаться). ели без то выше строчка
+
+

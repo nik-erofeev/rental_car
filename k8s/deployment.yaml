@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  # Имя Deployment. Используем согласованное имя без подчеркиваний
+  name: rental-app-api  # из docker-compose: rental_app_api → в K8s дефисы
+spec:
+  # Сколько Pod'ов держать одновременно
+  replicas: 2
+  selector:
+    matchLabels:
+      # Метки, по которым контроллер будет управлять Pod'ами
+      app: rental-app-api
+  template:
+    metadata:
+      labels:
+        # Эти метки попадут в Pod и должны совпадать с selector выше
+        app: rental-app-api
+    spec:
+      # Если образ приватный — раскомментируйте и создайте секрет реестра
+      # imagePullSecrets:
+      #   - name: my-registry-secret
+      containers:
+        - name: rental-app-api        # Имя контейнера в Pod
+          # Образ приложения. Должен быть доступен нодам кластера
+          image: nikerofeev/rental_car:latest
+          # Политика вытягивания образа: IfNotPresent — тянуть только если нет локально
+          imagePullPolicy: IfNotPresent
+          # Команда запуска контейнера (в образе нет CMD, как в docker-compose)
+          command: ["/app/docker/app.sh"]
+          ports:
+            - containerPort: 8000     # Порт, который слушает приложение внутри контейнера
+          # Подключаем переменные окружения из ConfigMap и Secret
+          envFrom:
+            - configMapRef:
+                name: rental-app-api-config
+            - secretRef:
+                name: rental-app-api-secret
+          # Проверка готовности (readiness): сервис начнет слать трафик только когда ОК
+          readinessProbe:
+            httpGet:
+              path: /docs            # эндпоинт, который должен отдавать 200
+              port: 8000
+            initialDelaySeconds: 15  # задержка перед первой проверкой
+            periodSeconds: 15        # периодичность проверок
+            timeoutSeconds: 5        # таймаут ответа
+            failureThreshold: 3      # сколько раз подряд должно упасть, чтобы считать неготовым
+          # Проверка живости (liveness): перезапуск контейнера при зависании
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          # Ресурсные запросы/лимиты — помогают планировщику и стабилизируют кластер
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+

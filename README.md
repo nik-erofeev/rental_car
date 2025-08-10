@@ -115,6 +115,51 @@ docker-compose up --build
 - Логи будут появляться в Elasticsearch, когда приложение запущено в Docker (Filebeat собирает JSON‑логи контейнера).
 - Полезные поля в Discover: `container.name`, `message`, `log.level`.
 
+<br>
+
+## Деплой в Kubernetes (локально/кластер)
+1) Собрать и запушить образ (нужен логин в Docker Hub):
+```bash
+bash k8s/build_push.sh
+```
+или вручную:
+```bash
+docker build -t nikerofeev/rental_car:latest .
+docker push nikerofeev/rental_car:latest
+```
+
+2) Применить манифесты (разнесены по файлам)
+
+    #### должна быть поднята БД в докере
+```bash
+make kube_run
+```
+
+3) Проверить ресурсы:
+```bash
+kubectl get pods,deploy,svc,hpa
+```
+
+4) Пробросить порт сервиса на локальную машину(ЧТОЮЫ РАБОАТЛА API):
+```bash
+kubectl port-forward service/rental-app-api 8000:80
+
+# можно взять ip и по нему вместо localhost
+# читать k8s/service.yaml 18-19 строка!!
+# kgp -o wide
+```
+
+Примечания:
+- В `k8s/deployment.yml` настроены readiness/liveness пробы (`/docs`, `/ping`).
+- HPA требует установленный metrics-server.
+- Для приватного реестра используйте `imagePullSecrets`.
+
+5) Удаление созданных ресурсов:
+```bash
+make kube_del
+```
+
+
 ### Модель данных (упрощённо, без авторизации)
 - **users**: id, email (uniq), full_name, phone, role (customer|manager|admin), is_active,
   created_at, updated_at
