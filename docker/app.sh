@@ -3,6 +3,8 @@
 # export env
 POSTGRES_HOST=${DB__HOST}
 POSTGRES_PORT=${DB__PORT}
+APP_HOST=${APP_HOST}
+APP_PORT=${APP_PORT}
 
 echo "Waiting for PostgreSQL to start..."
 until pg_isready -h "$POSTGRES_HOST" -p "$POSTGRES_PORT"; do
@@ -37,4 +39,9 @@ fi
 
 
 echo "Starting FastAPI server..."
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+# uvicorn app.main:app --host 0.0.0.0 --port 8000
+# на всякий случай ПЕРЕОПРЕДЕЛЯЕМ (иначе пор тне прокинется)!!!!!
+if [ "$APP_HOST" = "localhost" ]; then
+  APP_HOST="0.0.0.0"
+fi
+uvicorn app.main:app --host "$APP_HOST" --port "$APP_PORT"
