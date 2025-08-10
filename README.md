@@ -40,8 +40,12 @@ cp .env_example .env
 ```
 - Ключевые переменные (пример):
 ```dotenv
+
+# log
+USE_COLOR=true
+
 # Приложение
-APP_HOST=localhost
+APP_HOST=0.0.0.0
 APP_PORT=8000
 WORKERS=1
 RELOAD=true
@@ -60,7 +64,7 @@ DB__PORT=5432
 # DB__HOST=localhost
 # DB__PORT=15432
 
-DOCKER_NAME=rental
+DOCKER_NAME=rental_app
 ENVIRONMENT=local
 ```
 
@@ -73,7 +77,7 @@ alembic upgrade head
 ```bash
 uvicorn app.main:app --reload
 ```
-OpenAPI: `http://localhost:8000/docs`.
+OpenAPI: http://localhost:8000/docs.
 
 ### Запуск в Docker (опционально)
 ```bash
@@ -81,6 +85,35 @@ docker-compose up --build
 ```
 - Backend: `http://localhost:8000`
 - PostgreSQL публикуется на `15432`
+
+### Логи и мониторинг (Elasticsearch + Kibana)
+- После запуска `docker-compose` поднимутся `elasticsearch`, `kibana` и `filebeat`.
+- Kibana: откройте http://localhost:5601.
+- Data View создаётся автоматически скриптом `docker/elastic/kibana_setup.sh`:
+  - **Имя**: `rental_car_api_beckend`
+  - **Шаблон индекса**: `filebeat-*`
+  - **Поле времени**: `@timestamp`
+
+Шаги для просмотра логов:
+1. Зайдите в Kibana → Discover.
+2. Выберите Data View `rental_car_api_beckend`.
+3. В блоке Selected fields добавьте поля:
+   - `container.name`
+   - `log.level`
+   - `message`
+4. Пример запроса поиска (KQL):
+   - `container.name: "rental_app_api"`
+5. Дополнительные фильтры (KQL):
+   - По контейнеру бэкенда:
+     - `container.name: "rental_app_api"`
+   - По уровню логирования:
+     - `log.level: "INFO"` или `log.level: "ERROR"`
+   - Поле сообщения:
+     - выводится в поле `message`.
+
+Важно:
+- Логи будут появляться в Elasticsearch, когда приложение запущено в Docker (Filebeat собирает JSON‑логи контейнера).
+- Полезные поля в Discover: `container.name`, `message`, `log.level`.
 
 ### Модель данных (упрощённо, без авторизации)
 - **users**: id, email (uniq), full_name, phone, role (customer|manager|admin), is_active,

@@ -24,7 +24,7 @@ services:
     build:
       context: .
     restart: unless-stopped
-    command: ["/app/docker/app.sh"]   #  можно указать dockerfile
+    command: ["/app/docker/app.sh"]   # старт скрипт: миграции + uvicorn
     ports:
       - "8000:8000"
     depends_on:
@@ -38,6 +38,70 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+
+  elasticsearch:
+    # Хранилище логов (single-node, без security для локалки)
+    container_name: ${DOCKER_NAME}_elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - custom
+
+  kibana:
+    # UI для поиска по логам/создания data views
+    container_name: ${DOCKER_NAME}_kibana
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    restart: unless-stopped
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - custom
+
+  kibana_setup:
+    # Одноразовый init: создаёт Data View в Kibana через API
+    container_name: ${DOCKER_NAME}_kibana_setup
+    image: curlimages/curl:8.8.0
+    depends_on:
+      - kibana
+    entrypoint: ["/bin/sh", "/app/docker/elastic/kibana_setup.sh"]
+    volumes:
+      - ./docker/elastic/kibana_setup.sh:/app/docker/elastic/kibana_setup.sh:ro
+    environment:
+      - KIBANA_URL=http://kibana:5601
+      - DATA_VIEW_NAME=rental_car_api_beckend
+      - DATA_VIEW_TITLE=filebeat-*
+      - TIME_FIELD=@timestamp
+    networks:
+      - custom
+
+  filebeat:
+    # Агенt доставки логов контейнеров в Elasticsearch
+    container_name: ${DOCKER_NAME}_filebeat
+    image: docker.elastic.co/beats/filebeat:8.13.4
+    restart: unless-stopped
+    user: root
+    depends_on:
+      - backend
+      - elasticsearch
+    volumes:
+      - ./docker/elastic/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro  # конфиг Filebeat
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro   # доступ к JSON-логам Docker
+      - /var/run/docker.sock:/var/run/docker.sock:ro               # метаданные контейнеров
+      - filebeat_data:/usr/share/filebeat/data                     # реестр файлов/смещения
+    networks:
+      - custom
 
 #  # todo: для мониторинга PostgreSQL через Prometheus.
 #  postgres_exporter:
@@ -59,6 +123,8 @@ services:
 
 volumes:
   db_data:
+  es_data:
+  filebeat_data:
 
 
 networks:

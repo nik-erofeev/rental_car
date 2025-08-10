@@ -25,7 +25,7 @@ from app.core.logger_config import configure_logging
 from app.core.settings import APP_CONFIG, AppConfig
 
 # Настройка логирования
-configure_logging()
+configure_logging(use_color=APP_CONFIG.use_color)
 logger = logging.getLogger(__name__)
 
 

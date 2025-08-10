@@ -1,0 +1,39 @@
+# Filebeat собирает stdout/stderr всех контейнеров Docker и отправляет в Elasticsearch.
+#
+# Подход:
+# 1) Пытаемся декодировать JSON из поля "message" (если приложение пишет JSON-строки).
+# 2) При необходимости можно включить фильтрацию событий (drop_event), см. комментарии ниже.
+# Filebeat: читает логи контейнеров и шлёт в Elasticsearch
+filebeat.inputs:
+  - type: container
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    processors:
+      - add_docker_metadata: ~
+      - decode_json_fields:
+          fields: ["message"]
+          target: ""
+          overwrite_keys: true
+          add_error_key: true
+
+# Куда отправляем события
+# Elasticsearch output
+output.elasticsearch:
+  hosts: ["http://elasticsearch:9200"]
+
+# Для загрузки дашбордов/настроек (опционально)
+# Kibana setup (optional)
+setup.kibana:
+  host: "kibana:5601"
+
+processors:
+  - add_host_metadata: ~
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+
+# Логи самого Filebeat
+# Filebeat self-logs
+logging.to_stderr: true
+logging.json: true
+
+

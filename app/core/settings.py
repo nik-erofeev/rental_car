@@ -50,6 +50,8 @@ class Api(BaseModel):
 
 
 class AppConfig(BaseSettings):
+    use_color: bool = False  # true = цветной вывод в консоль; false = обычная консоль   # noqa: E501
+
     app_host: str
     app_port: int
     workers: int
@@ -57,7 +59,7 @@ class AppConfig(BaseSettings):
 
     db: DbConfig = DbConfig()
     api: Api = Api()
-    cors_origin_regex: str = r"(http://|https://)?(.*\.)?(qa|stage|localhost|0.0.0.0)(\.ru)?(:\d+)?$"
+    cors_origin_regex: str = r"(http://|https://)?(.*\.)?(qa|stage|localhost|0.0.0.0)" r"(\.ru)?(:\d+)?$"
     # environment: Environments = Environments.local
     # SECRET_KEY: str
     # ALGORITHM: str
