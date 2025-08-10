@@ -23,6 +23,7 @@ from app.api.reviews.routers import router as reviews_router
 from app.api.users.routers import router as users_router
 from app.core.logger_config import configure_logging
 from app.core.settings import APP_CONFIG, AppConfig
+from app.metrics import setup_fastapi_metrics
 
 # Настройка логирования
 configure_logging(use_color=APP_CONFIG.use_color)
@@ -103,6 +104,9 @@ def create_app(config: AppConfig) -> FastAPI:
         app_,
         include_in_schema=True,
     )  # можно выкл
+
+    # Кастомные метрики fastapi_* для дашборда 16110 # todo: опционально
+    setup_fastapi_metrics(app_, app_name=config.api.project_name)
 
     _init_routes(app_)
 

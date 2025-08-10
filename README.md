@@ -86,9 +86,10 @@ docker-compose up --build
 - Backend: `http://localhost:8000`
 - PostgreSQL публикуется на `15432`
 
-### Логи и мониторинг (Elasticsearch + Kibana)
+### Логи и мониторинг (Elasticsearch + Kibana + Grafana dashboard)
 - После запуска `docker-compose` поднимутся `elasticsearch`, `kibana` и `filebeat`.
 - Kibana: откройте http://localhost:5601.
+- Grafana с дашбордами http://localhost:3000
 - Data View создаётся автоматически скриптом `docker/elastic/kibana_setup.sh`:
   - **Имя**: `rental_car_api_beckend`
   - **Шаблон индекса**: `filebeat-*`

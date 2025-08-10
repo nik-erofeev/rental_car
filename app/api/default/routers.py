@@ -63,6 +63,7 @@ async def _exception() -> Any:
         return 1 / 0
     except ZeroDivisionError as e:
         logger.exception(f"Use exception {e=!r}")
-        return ExcResponse(
-            message="Ошибка отправлена в sentry и ТГ (если переданы креды)",
-        )
+        raise
+        # return ExcResponse(
+        #     message="Ошибка отправлена в sentry и ТГ (если переданы креды)",
+        # )
