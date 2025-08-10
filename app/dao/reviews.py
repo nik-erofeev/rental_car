@@ -1,7 +1,7 @@
+from sqlalchemy import and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from sqlalchemy import and_, or_
 
 from app.dao.base import BaseDAO
 from app.models.reviews import Review

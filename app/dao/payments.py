@@ -1,10 +1,10 @@
+from sqlalchemy import and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from sqlalchemy import and_
-from app.models.orders import Order
 
 from app.dao.base import BaseDAO
+from app.models.orders import Order
 from app.models.payments import Payment
 
 

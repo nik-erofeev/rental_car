@@ -1,11 +1,12 @@
 from datetime import datetime
+
 from pydantic import BaseModel, Field
 from pydantic.config import ConfigDict
+
 from app.api.car_photos.schemas import CarPhotoRead
 from app.api.car_reports.schemas import CarReportRead
 from app.api.reviews.schemas import ReviewRead
-
-from app.models.cars import CarCondition, EngineType, Transmission, CarStatus
+from app.models.cars import CarCondition, CarStatus, EngineType, Transmission
 
 
 class BaseCar(BaseModel):

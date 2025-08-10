@@ -3,11 +3,9 @@ from collections.abc import Sequence
 from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
-from sqlalchemy import (
-    delete as sqlalchemy_delete,
-    func,
-    update as sqlalchemy_update,
-)
+from sqlalchemy import delete as sqlalchemy_delete
+from sqlalchemy import func
+from sqlalchemy import update as sqlalchemy_update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select

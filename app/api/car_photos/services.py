@@ -1,22 +1,21 @@
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api.car_photos.exceptions import (
-    CarPhotoNotFoundException,
-    CarNotFoundForPhotoException,
-)
 
+from app.api.car_photos.exceptions import (
+    CarNotFoundForPhotoException,
+    CarPhotoNotFoundException,
+)
 from app.api.car_photos.schemas import (
+    CarPhotoCarRead,
     CarPhotoCreate,
+    CarPhotoDetailsRead,
+    CarPhotoIdFilter,
     CarPhotoRead,
     CarPhotoUpdate,
-    CarPhotoIdFilter,
-    CarPhotoDetailsRead,
-    CarPhotoCarRead,
 )
 from app.dao.car_photos import CarPhotosDAO
 from app.dao.cars import CarsDAO
-
 
 logger = logging.getLogger(__name__)
 

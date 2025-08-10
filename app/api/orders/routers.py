@@ -2,24 +2,23 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import ORJSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.settings import APP_CONFIG
-from app.db import get_session_without_commit
 from app.api.orders.schemas import (
     OrderCreate,
+    OrderDetailsRead,
     OrderRead,
     OrderUpdate,
-    OrderDetailsRead,
 )
 from app.api.orders.services import (
     create_order,
+    delete_order,
     get_order,
+    get_order_details,
     list_orders,
     update_order,
-    delete_order,
-    get_order_details,
 )
+from app.core.settings import APP_CONFIG
+from app.db import get_session_without_commit
 from app.models.orders import OrderStatus, PaymentMethod
-
 
 router = APIRouter(
     prefix=f"{APP_CONFIG.api.v1}/orders",

@@ -1,12 +1,14 @@
 import logging
-from fastapi import APIRouter, status, Depends
+
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import ORJSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db import get_session_without_commit
-from app.api.default.schemas import PingResponse, DBResponse
+
 from app.api.default.exceptions import DatabaseNotReadyException
+from app.api.default.schemas import DBResponse, PingResponse
+from app.db import get_session_without_commit
 
 router = APIRouter(
     tags=["default"],

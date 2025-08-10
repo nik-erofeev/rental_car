@@ -1,9 +1,10 @@
-from app.dao.base import BaseDAO
-from app.models.users import User
-from app.models.orders import Order
-from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
+
+from app.dao.base import BaseDAO
+from app.models.orders import Order
+from app.models.users import User
 
 
 class UsersDAO(BaseDAO[User]):

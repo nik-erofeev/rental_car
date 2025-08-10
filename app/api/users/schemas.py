@@ -1,9 +1,11 @@
 from datetime import datetime
+
 from pydantic import BaseModel, EmailStr
 from pydantic.config import ConfigDict
+
+from app.api.cars.schemas import CarRead
 from app.api.orders.schemas import OrderRead
 from app.api.reviews.schemas import ReviewRead
-from app.api.cars.schemas import CarRead
 
 
 class UserBase(BaseModel):

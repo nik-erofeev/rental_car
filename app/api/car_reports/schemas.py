@@ -1,6 +1,8 @@
 from datetime import datetime
+
 from pydantic import BaseModel, Field
 from pydantic.config import ConfigDict
+
 from app.models.car_reports import ReportType
 
 

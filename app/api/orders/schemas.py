@@ -1,13 +1,13 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from pydantic.config import ConfigDict
 
-from app.models.orders import OrderStatus, PaymentMethod
 from app.api.cars.schemas import CarRead
-from app.api.payments.schemas import PaymentRead
 from app.api.deliveries.schemas import DeliveryRead
+from app.api.payments.schemas import PaymentRead
+from app.models.orders import OrderStatus, PaymentMethod
 
 
 class BaseOrder(BaseModel):

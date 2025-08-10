@@ -1,9 +1,9 @@
 from enum import StrEnum, unique
 
-from pydantic import BaseModel, computed_field, PostgresDsn
+from dotenv import find_dotenv
+from pydantic import BaseModel, PostgresDsn, computed_field
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from dotenv import find_dotenv
 
 
 @unique

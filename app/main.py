@@ -1,8 +1,7 @@
-from app.application import create_app
-
-from app.core.settings import APP_CONFIG
 import uvicorn
 
+from app.application import create_app
+from app.core.settings import APP_CONFIG
 
 app = create_app(APP_CONFIG)
 

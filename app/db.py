@@ -1,13 +1,14 @@
-from sqlalchemy import func, Integer, TIMESTAMP
+from collections.abc import AsyncGenerator
+from datetime import datetime
+from typing import Annotated, Any
+
+from fastapi import Request
+from sqlalchemy import TIMESTAMP, Integer, func
 from sqlalchemy.ext.asyncio import (
     AsyncAttrs,
     AsyncSession,
 )
-from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
-from fastapi import Request
-from typing import Annotated, Any
-from collections.abc import AsyncGenerator
-from datetime import datetime
+from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 
 
 async def get_session(request: Request) -> AsyncGenerator[AsyncSession, None]:

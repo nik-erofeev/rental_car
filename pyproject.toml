@@ -21,10 +21,17 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pre-commit>=4.2.0",
+    "ruff>=0.12.8",
 ]
 
-[tool.black]
+[tool.ruff]
 line-length = 120
+fix = true
+exclude = ["migrations"]          # исключаем папку migrations
 
-[tool.flake8]
-max-line-length = 120
+[tool.ruff.lint]
+select = [
+#   "E",  # ошибки стиля из Flake8 (например, пробелы, отступы, лишние пробелы).
+   "F",  # ошибки, связанные с импортами и базовым синтаксисом.
+   "I",  # сортировка импортов (тот самый isort-подобный функционал).
+]

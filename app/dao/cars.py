@@ -1,6 +1,6 @@
+from sqlalchemy import and_, asc, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import and_, desc, asc
 from sqlalchemy.orm import selectinload
 
 from app.dao.base import BaseDAO

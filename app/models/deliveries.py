@@ -1,8 +1,8 @@
-from enum import StrEnum, unique
 from datetime import datetime
+from enum import StrEnum, unique
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String, Integer, TIMESTAMP, ForeignKey
+from sqlalchemy import TIMESTAMP, ForeignKey, Integer, String
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

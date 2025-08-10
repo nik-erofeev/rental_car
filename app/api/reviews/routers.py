@@ -2,18 +2,17 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import ORJSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.settings import APP_CONFIG
-from app.db import get_session_without_commit
 from app.api.reviews.schemas import ReviewCreate, ReviewRead, ReviewUpdate
 from app.api.reviews.services import (
     create_review,
+    delete_review,
     get_review,
+    get_review_details,
     list_reviews,
     update_review,
-    delete_review,
-    get_review_details,
 )
-
+from app.core.settings import APP_CONFIG
+from app.db import get_session_without_commit
 
 router = APIRouter(
     prefix=f"{APP_CONFIG.api.v1}/reviews",

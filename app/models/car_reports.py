@@ -1,7 +1,7 @@
 from enum import StrEnum, unique
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Integer, ForeignKey, JSON, String
+from sqlalchemy import JSON, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base

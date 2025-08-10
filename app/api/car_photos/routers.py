@@ -2,8 +2,6 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import ORJSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.settings import APP_CONFIG
-from app.db import get_session_without_commit
 from app.api.car_photos.schemas import (
     CarPhotoCreate,
     CarPhotoRead,
@@ -11,13 +9,14 @@ from app.api.car_photos.schemas import (
 )
 from app.api.car_photos.services import (
     create_car_photo,
+    delete_car_photo,
     get_car_photo,
+    get_car_photo_details,
     list_car_photos,
     update_car_photo,
-    delete_car_photo,
-    get_car_photo_details,
 )
-
+from app.core.settings import APP_CONFIG
+from app.db import get_session_without_commit
 
 router = APIRouter(
     prefix=f"{APP_CONFIG.api.v1}/car-photos",

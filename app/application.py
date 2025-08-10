@@ -1,23 +1,9 @@
 import logging
-from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-
-from app.core.logger_config import configure_logging
-from app.core.settings import AppConfig, APP_CONFIG
-from app.api.users.routers import router as users_router
-from app.api.cars.routers import router as cars_router
-from app.api.orders.routers import router as orders_router
-from app.api.payments.routers import router as payments_router
-from app.api.deliveries.routers import router as deliveries_router
-from app.api.reviews.routers import router as reviews_router
-from app.api.car_photos.routers import router as car_photos_router
-from app.api.car_reports.routers import router as car_reports_router
-
-
-from app.api.default.routers import router as default_router
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy.ext.asyncio import (
@@ -25,6 +11,18 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+
+from app.api.car_photos.routers import router as car_photos_router
+from app.api.car_reports.routers import router as car_reports_router
+from app.api.cars.routers import router as cars_router
+from app.api.default.routers import router as default_router
+from app.api.deliveries.routers import router as deliveries_router
+from app.api.orders.routers import router as orders_router
+from app.api.payments.routers import router as payments_router
+from app.api.reviews.routers import router as reviews_router
+from app.api.users.routers import router as users_router
+from app.core.logger_config import configure_logging
+from app.core.settings import APP_CONFIG, AppConfig
 
 # Настройка логирования
 configure_logging()

@@ -1,23 +1,23 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import ORJSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.settings import APP_CONFIG
-from app.db import get_session_without_commit
 from app.api.users.schemas import (
     UserCreate,
+    UserProfileRead,
     UserRead,
     UserUpdate,
-    UserProfileRead,
 )
 from app.api.users.services import (
     example_create_user,
+    example_delete_user,
     example_get_user,
     example_get_users,
     example_update_user,
-    example_delete_user,
     get_user_profile,
 )
+from app.core.settings import APP_CONFIG
+from app.db import get_session_without_commit
 
 # Публичный роутер
 router = APIRouter(

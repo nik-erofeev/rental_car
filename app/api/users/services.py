@@ -1,25 +1,26 @@
 import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.dao.users import UsersDAO
+
+from app.api.cars.schemas import CarRead
+from app.api.orders.schemas import OrderRead
+from app.api.reviews.schemas import ReviewRead
 
 # связи заказы/отзывы будут загружены через UsersDAO.get_with_relations
 from app.api.users.exceptions import (
-    UserNotFoundException,
     UserAlreadyExistsException,
+    UserNotFoundException,
 )
 from app.api.users.schemas import (
     UserCreate,
     UserCreateDb,
-    UserRead,
     UserIdFilter,
-    UserUpdateDb,
     UserListFilter,
     UserProfileRead,
+    UserRead,
+    UserUpdateDb,
 )
-from app.api.orders.schemas import OrderRead
-from app.api.reviews.schemas import ReviewRead
-from app.api.cars.schemas import CarRead
+from app.dao.users import UsersDAO
 
 logger = logging.getLogger(__name__)
 

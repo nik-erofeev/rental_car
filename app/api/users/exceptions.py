@@ -1,6 +1,5 @@
 from fastapi import HTTPException, status
 
-
 UserNotFoundException = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
     detail="Пользователь не найден",
