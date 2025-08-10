@@ -11,10 +11,22 @@ filebeat.inputs:
     processors:
       - add_docker_metadata: ~
       - decode_json_fields:
+          when:
+            regexp:
+              message: '^\{'
           fields: ["message"]
           target: ""
           overwrite_keys: true
           add_error_key: true
+      - dissect:
+          when:
+            not:
+              regexp:
+                message: '^\{'
+          tokenizer: "%{log.level}:%{rest}"
+          field: message
+          target_prefix: ""
+          ignore_failure: true
 
 # Куда отправляем события
 # Elasticsearch output

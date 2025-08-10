@@ -1,7 +1,11 @@
+import sentry_sdk
 import uvicorn
 
 from app.application import create_app
 from app.core.settings import APP_CONFIG
+
+if APP_CONFIG.sentry_dsn:
+    sentry_sdk.init(dsn=str(APP_CONFIG.sentry_dsn), enable_tracing=True, send_default_pii=True)
 
 app = create_app(APP_CONFIG)
 

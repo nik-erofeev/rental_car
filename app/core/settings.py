@@ -1,7 +1,7 @@
 from enum import StrEnum, unique
 
 from dotenv import find_dotenv
-from pydantic import BaseModel, PostgresDsn, computed_field
+from pydantic import BaseModel, HttpUrl, PostgresDsn, computed_field
 from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -50,8 +50,8 @@ class Api(BaseModel):
 
 
 class AppConfig(BaseSettings):
+    sentry_dsn: HttpUrl | None = None
     use_color: bool = False  # true = цветной вывод в консоль; false = обычная консоль   # noqa: E501
-
     app_host: str
     app_port: int
     workers: int
