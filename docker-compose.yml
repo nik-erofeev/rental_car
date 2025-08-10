@@ -104,6 +104,22 @@ services:
     networks:
       - custom
 
+  grafana_import_13115:
+    image: alpine:3.19
+    container_name: ${DOCKER_NAME}_grafana_import_13115
+    depends_on:
+      - grafana
+    environment:
+      - GRAFANA_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GRAFANA_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - DASHBOARD_PATH=/dashboards/13115_rev1.json
+    volumes:
+      - ./docker/grafana/13115_rev1.json:/dashboards/13115_rev1.json:ro
+      - ./docker/grafana/import-local.sh:/scripts/import-local.sh:ro
+    entrypoint: ["sh", "/scripts/import-local.sh"]
+    networks:
+      - custom
+
   prometheus:
     container_name: ${DOCKER_NAME}_prometheus
     image: prom/prometheus:v2.53.0
@@ -118,6 +134,21 @@ services:
       - custom
     depends_on:
       - backend
+
+  postgres_exporter:
+    container_name: ${DOCKER_NAME}_postgres_exporter
+    image: wrouesnel/postgres_exporter:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB__USER}:${DB__PASSWORD}@postgres:5432/${DB__NAME}?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      - postgres
+    networks:
+      - custom
 
   elasticsearch:
     # Хранилище логов (single-node, без security для локалки)
@@ -183,23 +214,6 @@ services:
     networks:
       - custom
 
-#  # todo: для мониторинга PostgreSQL через Prometheus.
-#  postgres_exporter:
-#    container_name: postgres_exporter-smit
-#    image: wrouesnel/postgres_exporter:latest
-#    restart: unless-stopped
-#    env_file:
-#      - .env
-#    environment:
-#      # проверить почему не подтягиваются env
-#      #      DATA_SOURCE_URI: "postgres://${DB__USER}:${DB__PASSWORD}@${DB__HOST}:${DB__PORT}/${DB__NAME}?sslmode=disable"
-#      DATA_SOURCE_NAME: "postgres://user:pass@postgres:5432/rental_car?sslmode=disable"
-#    ports:
-#      - "9187:9187"
-#    depends_on:
-#      - postgres
-#    networks:
-#      - custom
 
 volumes:
   db_data:
