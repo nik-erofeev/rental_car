@@ -5,7 +5,7 @@ from colorama import Fore, Style
 DEFAULT_LOG_FORMAT = "[%(asctime)s.%(msecs)03d] %(funcName)20s %(module)s:%(lineno)d %(levelname)-8s - %(message)s"  # noqa: E501 : ignore
 # DEFAULT_LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
-
+#
 # def configure_logging(level: int = logging.INFO) -> None:
 #     logging.basicConfig(
 #         level=level,
