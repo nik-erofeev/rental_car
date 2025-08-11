@@ -1,0 +1,13 @@
+{
+  "name": "rental_car_app_tooling",
+  "private": true,
+  "devDependencies": {
+    "playwright": "^1.47.0"
+  },
+  "scripts": {
+    "pw:install": "npx playwright install --with-deps",
+    "pw:check": "node tooling/playwright_check.mjs",
+    "pw:all": "node tooling/playwright_all.mjs"
+  }
+}
+
