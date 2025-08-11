@@ -16,6 +16,9 @@ spec:
         # Эти метки попадут в Pod и должны совпадать с selector выше
         app: rental-app-api
     spec:
+#      hostNetwork: true               # <<< добавляем это # todo: + команда ниже
+#      dnsPolicy: ClusterFirstWithHostNet  # <<< чтобы DNS внутри пода работал # todo: чтобы по ip ноды заходить (или в service 18-19 строка)
+
       # Если образ приватный — раскомментируйте и создайте секрет реестра
       # imagePullSecrets:
       #   - name: my-registry-secret
