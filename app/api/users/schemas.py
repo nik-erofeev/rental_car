@@ -1,10 +1,11 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from pydantic.config import ConfigDict
 
 from app.api.cars.schemas import CarRead
 from app.api.orders.schemas import OrderRead
+from app.api.payments.schemas import PaymentRead
 from app.api.reviews.schemas import ReviewRead
 
 
@@ -46,6 +47,10 @@ class UserUpdate(BaseModel):
     is_active: bool | None = None
 
 
+class UserOrdersRead(OrderRead):
+    payments: list[PaymentRead] | None = Field(default_factory=list)
+
+
 class UserProfileRead(BaseModel):
     """Агрегированный профиль пользователя.
 
@@ -55,6 +60,10 @@ class UserProfileRead(BaseModel):
     model_config = ConfigDict(from_attributes=True, use_enum_values=True)
 
     user: UserRead
-    orders: list[OrderRead]
+    orders: list[UserOrdersRead]
     reviews: list[ReviewRead]
     cars: list[CarRead]
+
+
+class OrderUserId(BaseModel):
+    user_id: int

@@ -3,23 +3,26 @@ import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.cars.schemas import CarRead
-from app.api.orders.schemas import OrderRead
 from app.api.reviews.schemas import ReviewRead
 
 # связи заказы/отзывы будут загружены через UsersDAO.get_with_relations
 from app.api.users.exceptions import (
     UserAlreadyExistsException,
     UserNotFoundException,
+    UserOrderException,
 )
 from app.api.users.schemas import (
+    OrderUserId,
     UserCreate,
     UserCreateDb,
     UserIdFilter,
     UserListFilter,
+    UserOrdersRead,
     UserProfileRead,
     UserRead,
     UserUpdateDb,
 )
+from app.dao.orders import OrdersDAO
 from app.dao.users import UsersDAO
 
 logger = logging.getLogger(__name__)
@@ -30,7 +33,7 @@ async def example_create_user(
     user: UserCreate,
 ) -> UserRead:
     logger.info("[users] Создание пользователя: %s", user)
-    if await UsersDAO.get_by_email(session, user.email):
+    if await UsersDAO.find_one_or_none(session=session, filters=user):
         logger.warning(
             "[users] Пользователь уже существует email=%s",
             user.email,
@@ -38,14 +41,14 @@ async def example_create_user(
         raise UserAlreadyExistsException
 
     user_db = UserCreateDb(email=user.email, is_active=True)
-    user_obj = await UsersDAO.add(session, user_db)
+    user_obj = await UsersDAO.add(session=session, values=user_db)
     await session.commit()
     logger.info("[users] Пользователь создан id=%s", user_obj.id)
     return UserRead.model_validate(user_obj)
 
 
 async def example_get_user(session: AsyncSession, user_id: int) -> UserRead:
-    user = await UsersDAO.find_one_or_none_by_id(user_id, session)
+    user = await UsersDAO.find_one_or_none_by_id(data_id=user_id, session=session)
     if not user:
         logger.warning("[users] Пользователь не найден id=%s", user_id)
         raise UserNotFoundException
@@ -81,6 +84,14 @@ async def example_update_user(
 
 async def example_delete_user(session: AsyncSession, user_id: int) -> None:
     logger.info("[users] Удаление пользователя id=%s", user_id)
+
+    filter_user_id = OrderUserId(user_id=user_id)
+
+    user_order = await OrdersDAO.find_one_or_none(session=session, filters=filter_user_id)
+    if user_order:
+        logger.warning(f"Нельзя удалить юзера id: {user_id}, у которого есть заказы")
+        raise UserOrderException
+
     filter_obj = UserIdFilter(id=user_id)
     deleted = await UsersDAO.delete(session, filter_obj)
     if deleted == 0:
@@ -127,14 +138,15 @@ async def get_user_profile(
         raise UserNotFoundException
 
     # Используем загруженные связи вместо дополнительных запросов
-    orders = list(user.orders)
-    reviews = list(user.reviews)
-    cars = [o.car for o in orders if o.car]
+    # orders = user.orders
+    # reviews = user.reviews
+    cars = [o.car for o in user.orders if o.car]
 
+    order_list = [UserOrdersRead.model_validate(order) for order in user.orders]
     result = UserProfileRead(
         user=UserRead.model_validate(user),
-        orders=[OrderRead.model_validate(o) for o in orders],
-        reviews=[ReviewRead.model_validate(r) for r in reviews],
+        orders=order_list,
+        reviews=[ReviewRead.model_validate(r) for r in user.reviews],
         cars=[CarRead.model_validate(c) for c in cars],
     )
 

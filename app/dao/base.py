@@ -2,7 +2,7 @@ import logging
 from collections.abc import Sequence
 from typing import Any, Generic, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, HttpUrl
 from sqlalchemy import delete as sqlalchemy_delete
 from sqlalchemy import func
 from sqlalchemy import update as sqlalchemy_update
@@ -103,6 +103,11 @@ class BaseDAO(Generic[T]):
     @classmethod
     async def add(cls, session: AsyncSession, values: BaseModel) -> T:
         values_dict = values.model_dump(exclude_unset=True)
+        # Явно конвертируем все HttpUrl в str
+        for key, val in values_dict.items():
+            if isinstance(val, (HttpUrl, EmailStr)):
+                values_dict[key] = str(val)
+
         logger.info(
             f"Добавление записи {cls.model.__name__} с параметрами: {values_dict}",
         )
@@ -147,6 +152,18 @@ class BaseDAO(Generic[T]):
     ) -> int:
         filter_dict = filters.model_dump(exclude_unset=True)
         values_dict = values.model_dump(exclude_unset=True)
+
+        # Универсальное преобразование значений в values_dict
+        def convert_value(v):
+            if isinstance(v, EmailStr):
+                return str(v)
+            if isinstance(v, HttpUrl):
+                return str(v)
+            # Можно добавить сюда другие кастомные типы при необходимости
+            return v
+
+        values_dict = {k: convert_value(v) for k, v in values_dict.items()}
+
         logger.info(
             f"Обновление записей {cls.model.__name__} по фильтру: {filter_dict} с параметрами: {values_dict}",
         )

@@ -52,46 +52,60 @@ async def list_car_reports(
     limit: int = 20,
     offset: int = 0,
 ) -> list[CarReportRead]:
+    # Готовим фильтры для DAO
+    filters_obj = None
     if car_id is not None:
-        items = await CarReportsDAO.find_by_car(session, car_id)
-        result = [CarReportRead.model_validate(i) for i in items[offset : offset + limit]]
-        logger.info("[car_reports] Найдено отчётов: %s", len(result))
-        return result
+        filters_obj = CarReportIdFilter(car_id=car_id)
+    # Используем единую пагинацию
     page = offset // limit + 1 if limit else 1
     items = await CarReportsDAO.paginate(
-        session,
+        session=session,
         page=page,
         page_size=limit,
-        filters=None,
+        filters=filters_obj,
     )
+
+    if not items:
+        raise CarReportNotFoundException
+
     result = [CarReportRead.model_validate(i) for i in items]
+    logger.info("[car_reports] Найдено отчётов: %s", len(result))
     return result
 
 
 async def update_car_report(
     session: AsyncSession,
     report_id: int,
-    data: CarReportUpdate,
+    data_update: CarReportUpdate,
 ) -> CarReportRead:
     logger.info("[car_reports] Обновление отчёта id=%s", report_id)
-    values = data.model_dump(exclude_unset=True)
-    if not values:
-        logger.info("[car_reports] Обновление без изменений id=%s", report_id)
-        return await get_car_report(session, report_id)
+
+    if data_update.car_id is not None:
+        car_id = await CarsDAO.find_one_or_none_by_id(session=session, data_id=data_update.car_id)
+        if not car_id:
+            raise CarNotFoundForReportException
+
+    filter_obj = CarReportIdFilter(id=report_id)
+    values_obj = CarReportUpdate(**data_update.model_dump(exclude_unset=True))
+
+    #####
     updated = await CarReportsDAO.update(
         session,
-        CarReportIdFilter(id=report_id),
-        data,
+        filter_obj,
+        values_obj,
     )
+    await session.commit()
+
     if updated == 0:
         logger.warning(
             "[car_reports] Отчёт не найден для обновления id=%s",
             report_id,
         )
         raise CarReportNotFoundException
-    report = await CarReportsDAO.find_one_or_none_by_id(report_id, session)
+
+    updated_report = await get_car_report(session, report_id)
     logger.info("[car_reports] Отчёт обновлён id=%s", report_id)
-    return CarReportRead.model_validate(report)
+    return updated_report
 
 
 async def delete_car_report(session: AsyncSession, report_id: int) -> None:

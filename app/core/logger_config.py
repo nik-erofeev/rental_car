@@ -70,7 +70,7 @@ def configure_logging(
     console_handler.setFormatter(ColoredFormatter(DEFAULT_LOG_FORMAT, use_color=use_color))
     logger.addHandler(console_handler)
 
-    # JSON-логи для Elastic (Filebeat)
+    # # JSON-логи для Elastic (Filebeat)
     try:
         jsonlogger_module = importlib.import_module("pythonjsonlogger.jsonlogger")
         json_handler = logging.StreamHandler()

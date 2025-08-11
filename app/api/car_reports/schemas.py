@@ -25,10 +25,16 @@ class CarReportRead(BaseCarReport):
 class CarReportUpdate(BaseModel):
     report_type: ReportType | None = None
     data: dict | None = None
+    car_id: int | None = Field(gt=0)
+
+
+class CarReportUpdateResponse(CarReportUpdate):
+    id: int | None
 
 
 class CarReportIdFilter(BaseModel):
-    id: int
+    id: int | None = None
+    car_id: int | None = None
 
 
 class CarReportDetailsRead(BaseModel):
@@ -49,3 +55,10 @@ class CarReportCarRead(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+
+
+class CarReportPartialUpdate(BaseModel):
+    id: int
+    car_id: int | None = None
+    report_type: ReportType | None = None
+    data: dict | None = None

@@ -100,3 +100,12 @@ class CarsDAO(BaseDAO[Car]):
         )
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
+
+    @classmethod
+    async def get_car_with_orders(cls, car_id: int, session: AsyncSession) -> Car | None:
+        result = await session.execute(
+            select(cls.model)
+            .options(selectinload(cls.model.orders))  # заранее подгрузить orders
+            .filter(cls.model.id == car_id),
+        )
+        return result.scalars().first()

@@ -5,9 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.cars.schemas import CarRead
 from app.api.deliveries.schemas import DeliveryRead
 from app.api.orders.exceptions import (
+    CarsNotFoundByException,
     OrderCarNotFoundException,
     OrderNotFoundException,
     OrdersNotFoundByFiltersException,
+    UsersNotFoundByException,
 )
 from app.api.orders.schemas import (
     OrderCreate,
@@ -20,6 +22,7 @@ from app.api.orders.schemas import (
 from app.api.payments.schemas import PaymentRead
 from app.dao.cars import CarsDAO
 from app.dao.orders import OrdersDAO
+from app.dao.users import UsersDAO
 
 logger = logging.getLogger(__name__)
 
@@ -79,17 +82,28 @@ async def list_orders(
 async def update_order(
     session: AsyncSession,
     order_id: int,
-    data: OrderUpdate,
+    data_update: OrderUpdate,
 ) -> OrderRead:
     logger.info("[orders] Обновление заказа id=%s", order_id)
-    values = data.model_dump(exclude_unset=True)
-    if not values:
-        logger.info("[orders] Обновление без изменений id=%s", order_id)
-        return await get_order(session, order_id)
+
+    if data_update.user_id is not None:
+        user = await UsersDAO.find_one_or_none_by_id(data_update.user_id, session)
+        if not user:
+            raise UsersNotFoundByException
+
+    if data_update.car_id is not None:
+        car = await CarsDAO.find_one_or_none_by_id(data_update.car_id, session)
+        if not car:
+            raise CarsNotFoundByException
+
+    filter_obj = OrderIdFilter(id=order_id)
+    values_obj = OrderUpdate(**data_update.model_dump(exclude_unset=True))
+
+    ####
     updated = await OrdersDAO.update(
         session,
-        OrderIdFilter(id=order_id),
-        data,
+        filter_obj,
+        values_obj,
     )
     if updated == 0:
         logger.warning(
@@ -97,6 +111,7 @@ async def update_order(
             order_id,
         )
         raise OrderNotFoundException
+    await session.commit()
     order = await OrdersDAO.find_one_or_none_by_id(order_id, session)
     logger.info("[orders] Заказ обновлён id=%s", order_id)
     return OrderRead.model_validate(order)

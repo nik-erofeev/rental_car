@@ -6,6 +6,7 @@ from app.api.car_photos.schemas import CarPhotoRead
 from app.api.car_reports.schemas import CarReportRead
 from app.api.cars.exceptions import (
     CarAlreadyExistsException,
+    CarDeletedNotFoundException,
     CarNotFoundException,
     CarsNotFoundByFiltersException,
 )
@@ -94,6 +95,7 @@ async def update_car(
         CarIdFilter(id=car_id),
         data,
     )
+    await session.commit()
     if updated == 0:
         logger.warning("[cars] Авто не найдено для обновления id=%s", car_id)
         raise CarNotFoundException
@@ -104,10 +106,17 @@ async def update_car(
 
 async def delete_car(session: AsyncSession, car_id: int) -> None:
     logger.info("[cars] Удаление авто id=%s", car_id)
-    deleted = await CarsDAO.delete(session, CarIdFilter(id=car_id))
-    if deleted == 0:
-        logger.warning("[cars] Авто не найдено для удаления id=%s", car_id)
+
+    car = await CarsDAO.get_car_with_orders(car_id=car_id, session=session)
+    if not car:
+        logger.warning("[cars] Авто не найдено id=%s", car_id)
         raise CarNotFoundException
+
+    if car.orders:
+        logger.warning("[cars] Нельзя удалить авто id=%s — есть связанные заказы", car_id)
+        raise CarDeletedNotFoundException
+
+    await CarsDAO.delete(session, CarIdFilter(id=car_id))
     await session.commit()
     logger.info("[cars] Авто удалено id=%s", car_id)
 

@@ -11,17 +11,6 @@ class UsersDAO(BaseDAO[User]):
     model = User
 
     @classmethod
-    async def get_by_email(
-        cls,
-        session: AsyncSession,
-        email: str,
-    ) -> User | None:
-        result = await session.execute(
-            select(cls.model).where(cls.model.email == email),
-        )
-        return result.scalar_one_or_none()
-
-    @classmethod
     async def get_with_relations(
         cls,
         session: AsyncSession,
@@ -29,7 +18,7 @@ class UsersDAO(BaseDAO[User]):
     ) -> User | None:
         """Получить пользователя с заказами и отзывами.
 
-        Включает вложенные связи заказов: car, payments, deliveries.
+        Включает вложенные связи заказов: car, payments, deliveries, orders.
         """
         stmt = (
             select(cls.model)
@@ -42,4 +31,4 @@ class UsersDAO(BaseDAO[User]):
             )
         )
         result = await session.execute(stmt)
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()

@@ -14,3 +14,8 @@ CarsNotFoundByFiltersException = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
     detail="По заданным фильтрам авто не найдены",
 )
+
+CarDeletedNotFoundException = HTTPException(
+    status_code=status.HTTP_404_NOT_FOUND,
+    detail="Нельзя удалить авто — есть связанные заказы",
+)

@@ -82,6 +82,7 @@ async def update_delivery(
     data: DeliveryUpdate,
 ) -> DeliveryRead:
     logger.info("[deliveries] Обновление доставки id=%s", delivery_id)
+
     values = data.model_dump(exclude_unset=True)
     if not values:
         logger.info("[deliveries] Обновление без изменений id=%s", delivery_id)

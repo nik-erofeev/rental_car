@@ -53,7 +53,8 @@ class OrderUpdate(BaseModel):
     customer_name: str | None = None
     customer_phone: str | None = None
     customer_email: EmailStr | None = None
-    user_id: int | None = None
+    user_id: int | None = Field(default=None, gt=0)
+    car_id: int | None = Field(default=None, gt=0)
     status: OrderStatus | None = None
     payment_method: PaymentMethod | None = None
     total_amount: float | None = Field(default=None, ge=0)

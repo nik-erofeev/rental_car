@@ -2,10 +2,10 @@ from fastapi import HTTPException, status
 
 CarPhotoNotFoundException = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
-    detail="Photo not found",
+    detail="Фото не найдены",
 )
 
-CarNotFoundForPhotoException = HTTPException(
+CarPhotoFilterNotFoundException = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
-    detail="Car not found",
+    detail="По заданным фильтрам фото не найдены",
 )
