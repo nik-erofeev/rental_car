@@ -12,7 +12,6 @@ from app.api.users.exceptions import (
     UserOrderException,
 )
 from app.api.users.schemas import (
-    OrderUserId,
     UserCreate,
     UserCreateDb,
     UserIdFilter,
@@ -85,9 +84,7 @@ async def example_update_user(
 async def example_delete_user(session: AsyncSession, user_id: int) -> None:
     logger.info("[users] Удаление пользователя id=%s", user_id)
 
-    filter_user_id = OrderUserId(user_id=user_id)
-
-    user_order = await OrdersDAO.find_one_or_none(session=session, filters=filter_user_id)
+    user_order = await OrdersDAO.get_for_user(session=session, user_id=user_id)
     if user_order:
         logger.warning(f"Нельзя удалить юзера id: {user_id}, у которого есть заказы")
         raise UserOrderException
