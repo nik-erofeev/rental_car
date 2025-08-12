@@ -7,13 +7,10 @@ from app.api.reviews.schemas import ReviewRead
 
 # связи заказы/отзывы будут загружены через UsersDAO.get_with_relations
 from app.api.users.exceptions import (
-    UserAlreadyExistsException,
     UserNotFoundException,
     UserOrderException,
 )
 from app.api.users.schemas import (
-    UserCreate,
-    UserCreateDb,
     UserIdFilter,
     UserListFilter,
     UserOrdersRead,
@@ -27,25 +24,6 @@ from app.dao.users import UsersDAO
 logger = logging.getLogger(__name__)
 
 
-async def example_create_user(
-    session: AsyncSession,
-    user: UserCreate,
-) -> UserRead:
-    logger.info("[users] Создание пользователя: %s", user)
-    if await UsersDAO.find_one_or_none(session=session, filters=user):
-        logger.warning(
-            "[users] Пользователь уже существует email=%s",
-            user.email,
-        )
-        raise UserAlreadyExistsException
-
-    user_db = UserCreateDb(email=user.email, is_active=True)
-    user_obj = await UsersDAO.add(session=session, values=user_db)
-    await session.commit()
-    logger.info("[users] Пользователь создан id=%s", user_obj.id)
-    return UserRead.model_validate(user_obj)
-
-
 async def example_get_user(session: AsyncSession, user_id: int) -> UserRead:
     user = await UsersDAO.find_one_or_none_by_id(data_id=user_id, session=session)
     if not user:
@@ -57,7 +35,7 @@ async def example_get_user(session: AsyncSession, user_id: int) -> UserRead:
 async def example_update_user(
     session: AsyncSession,
     user_id: int,
-    user_update,
+    user_update: UserUpdateDb,
 ) -> UserRead:
     logger.info(
         "[users] Обновление пользователя id=%s данными: %s",
@@ -73,6 +51,9 @@ async def example_update_user(
             user_id,
         )
         raise UserNotFoundException
+
+    await session.commit()
+
     user = await UsersDAO.find_one_or_none_by_id(user_id, session)
     logger.info(
         "[users] Пользователь обновлён id=%s",

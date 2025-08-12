@@ -61,6 +61,10 @@ async def register_user(
     # existing = await UsersDAO.get_by_email(session, str(data.email))
     existing = await UsersDAO.find_one_or_none(session=session, filters=filter_user_email)
     if existing:
+        logger.warning(
+            "[users] Пользователь уже существует email=%s",
+            data.email,
+        )
         raise UserAlreadyExists
 
     hashed = hash_password(data.password)
@@ -74,6 +78,7 @@ async def register_user(
     user = await UsersDAO.add(session, values=user_payload)
     # Обновим значения по умолчанию сервера (created_at и т.п.)
     await session.refresh(user)
+    logger.info("[users] Пользователь создан email=%s", user.email)
     return AuthUserRead.model_validate(user)
 
 

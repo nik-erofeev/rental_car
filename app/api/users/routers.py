@@ -4,13 +4,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.auth.services import get_current_user
 from app.api.users.schemas import (
-    UserCreate,
     UserProfileRead,
     UserRead,
-    UserUpdate,
+    UserUpdateDb,
 )
 from app.api.users.services import (
-    example_create_user,
     example_delete_user,
     example_get_user,
     example_get_users,
@@ -26,20 +24,20 @@ router = APIRouter(
     tags=["users"],
 )
 
-
-@router.post(
-    "/",
-    summary="Регистрация нового пользователя",
-    description=("Создаёт нового пользователя по email и паролю. " "Возвращает данные созданного пользователя."),
-    response_model=UserRead,
-    status_code=status.HTTP_201_CREATED,
-    response_class=ORJSONResponse,
-)
-async def register_user(
-    user: UserCreate,
-    session: AsyncSession = Depends(get_session_without_commit),
-):
-    return await example_create_user(session, user)
+#
+# @router.post(
+#     "/",
+#     summary="Регистрация нового пользователя",
+#     description=("Создаёт нового пользователя по email и паролю. " "Возвращает данные созданного пользователя."),
+#     response_model=UserRead,
+#     status_code=status.HTTP_201_CREATED,
+#     response_class=ORJSONResponse,
+# )
+# async def register_user(
+#     user: UserCreate,
+#     session: AsyncSession = Depends(get_session_without_commit),
+# ):
+#     return await example_create_user(session, user)
 
 
 @router.get(
@@ -101,7 +99,7 @@ async def get_users(
 )
 async def update_user(
     user_id: int,
-    user_update: UserUpdate,
+    user_update: UserUpdateDb,
     session: AsyncSession = Depends(get_session_without_commit),
     # current_user=Depends(get_current_user),
 ):
