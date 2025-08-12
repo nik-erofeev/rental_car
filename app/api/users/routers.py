@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import ORJSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.auth.services import get_current_user
 from app.api.users.schemas import (
     UserCreate,
     UserProfileRead,
@@ -48,10 +49,12 @@ async def register_user(
     response_model=UserRead,
     response_class=ORJSONResponse,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
 )
 async def get_user(
     user_id: int,
     session: AsyncSession = Depends(get_session_without_commit),
+    # current_user=Depends(get_current_user),
 ):
     return await example_get_user(session, user_id)
 
@@ -65,6 +68,7 @@ async def get_user(
     response_model=list[UserRead],
     response_class=ORJSONResponse,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
 )
 async def get_users(
     is_active: bool | None = None,
@@ -76,6 +80,7 @@ async def get_users(
     ),
     offset: int = Query(0, ge=0, description="Смещение для пагинации"),
     session: AsyncSession = Depends(get_session_without_commit),
+    # current_user=Depends(get_current_user),
 ):
     return await example_get_users(
         session=session,
@@ -92,11 +97,13 @@ async def get_users(
     description=(
         "Обновляет email или статус активности пользователя по его ID. " "Возвращает обновлённые данные пользователя."
     ),
+    dependencies=[Depends(get_current_user)],
 )
 async def update_user(
     user_id: int,
     user_update: UserUpdate,
     session: AsyncSession = Depends(get_session_without_commit),
+    # current_user=Depends(get_current_user),
 ):
     return await example_update_user(session, user_id, user_update)
 
@@ -106,10 +113,12 @@ async def update_user(
     summary="Удалить пользователя",
     description="Удаляет пользователя по его ID.",
     status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(get_current_user)],
 )
 async def delete_user(
     user_id: int,
     session: AsyncSession = Depends(get_session_without_commit),
+    # current_user=Depends(get_current_user),
 ):
     await example_delete_user(session, user_id)
     return None
@@ -122,9 +131,11 @@ async def delete_user(
     response_model=UserProfileRead,
     response_class=ORJSONResponse,
     status_code=status.HTTP_200_OK,
+    dependencies=[Depends(get_current_user)],
 )
 async def get_user_aggregate_profile(
     user_id: int,
     session: AsyncSession = Depends(get_session_without_commit),
+    # current_user=Depends(get_current_user),
 ):
     return await get_user_profile(session, user_id)

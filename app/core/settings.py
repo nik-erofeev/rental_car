@@ -61,10 +61,12 @@ class AppConfig(BaseSettings):
     api: Api = Api()
     cors_origin_regex: str = r"(http://|https://)?(.*\.)?(qa|stage|localhost|0.0.0.0)" r"(\.ru)?(:\d+)?$"
     # environment: Environments = Environments.local
-    # SECRET_KEY: str
-    # ALGORITHM: str
-    # ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    # REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # JWT/Безопасность
+    # переопределить в .env (openssl rand -hex 32)
+    secret_key: str = "change-me"
+    jwt_algorithm: str = "HS256"
+    access_token_expire_minutes: int = 30
 
     model_config = SettingsConfigDict(
         env_nested_delimiter="__",

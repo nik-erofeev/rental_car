@@ -37,9 +37,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["car_id"], ["cars.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_car_photos_car_id"), "car_photos", ["car_id"], unique=False
-    )
+    op.create_index(op.f("ix_car_photos_car_id"), "car_photos", ["car_id"], unique=False)
     op.create_table(
         "car_reports",
         sa.Column("car_id", sa.Integer(), nullable=False),
@@ -55,9 +53,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["car_id"], ["cars.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_car_reports_car_id"), "car_reports", ["car_id"], unique=False
-    )
+    op.create_index(op.f("ix_car_reports_car_id"), "car_reports", ["car_id"], unique=False)
     op.create_table(
         "orders",
         sa.Column("customer_name", sa.String(length=128), nullable=False),
@@ -91,9 +87,7 @@ def upgrade() -> None:
             ),
             nullable=False,
         ),
-        sa.Column(
-            "total_amount", sa.Numeric(precision=12, scale=2), nullable=False
-        ),
+        sa.Column("total_amount", sa.Numeric(precision=12, scale=2), nullable=False),
         sa.Column("delivery_address", sa.Text(), nullable=True),
         sa.Column("delivery_date", sa.TIMESTAMP(), nullable=True),
         sa.Column(
@@ -113,12 +107,8 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_orders_car_id"), "orders", ["car_id"], unique=False
-    )
-    op.create_index(
-        op.f("ix_orders_user_id"), "orders", ["user_id"], unique=False
-    )
+    op.create_index(op.f("ix_orders_car_id"), "orders", ["car_id"], unique=False)
+    op.create_index(op.f("ix_orders_user_id"), "orders", ["user_id"], unique=False)
     op.create_table(
         "reviews",
         sa.Column("customer_name", sa.String(length=128), nullable=False),
@@ -137,12 +127,8 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_reviews_car_id"), "reviews", ["car_id"], unique=False
-    )
-    op.create_index(
-        op.f("ix_reviews_user_id"), "reviews", ["user_id"], unique=False
-    )
+    op.create_index(op.f("ix_reviews_car_id"), "reviews", ["car_id"], unique=False)
+    op.create_index(op.f("ix_reviews_user_id"), "reviews", ["user_id"], unique=False)
     op.create_table(
         "deliveries",
         sa.Column("order_id", sa.Integer(), nullable=False),
@@ -167,14 +153,10 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(
-            ["order_id"], ["orders.id"], ondelete="CASCADE"
-        ),
+        sa.ForeignKeyConstraint(["order_id"], ["orders.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_deliveries_order_id"), "deliveries", ["order_id"], unique=False
-    )
+    op.create_index(op.f("ix_deliveries_order_id"), "deliveries", ["order_id"], unique=False)
     op.create_table(
         "payments",
         sa.Column("order_id", sa.Integer(), nullable=False),
@@ -210,14 +192,10 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(
-            ["order_id"], ["orders.id"], ondelete="CASCADE"
-        ),
+        sa.ForeignKeyConstraint(["order_id"], ["orders.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_payments_order_id"), "payments", ["order_id"], unique=False
-    )
+    op.create_index(op.f("ix_payments_order_id"), "payments", ["order_id"], unique=False)
     # ### end Alembic commands ###
 
 

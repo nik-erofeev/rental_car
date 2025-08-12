@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from app.api.auth.routers import router as auth_router
 from app.api.car_photos.routers import router as car_photos_router
 from app.api.car_reports.routers import router as car_reports_router
 from app.api.cars.routers import router as cars_router
@@ -37,6 +38,7 @@ def _init_routes(app: FastAPI) -> None:
         app: Экземпляр FastAPI, к которому нужно подключить роутеры
     """
     routers = [
+        auth_router,
         default_router,
         users_router,
         cars_router,
