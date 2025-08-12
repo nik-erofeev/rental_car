@@ -1,17 +1,17 @@
 BEGIN;
 
--- users (role: customer|manager|admin)
-INSERT INTO users (email, is_active, full_name, phone, role) VALUES
-('user1@example.com',  true, 'User One',   '+79990000001', 'customer'),
-('user2@example.com',  true, 'User Two',   '+79990000002', 'manager'),
-('user3@example.com',  true, 'User Three', '+79990000003', 'admin'),
-('user4@example.com',  true, 'User Four',  '+79990000004', 'customer'),
-('user5@example.com',  true, 'User Five',  '+79990000005', 'manager'),
-('user6@example.com',  true, 'User Six',   '+79990000006', 'customer'),
-('user7@example.com',  true, 'User Seven', '+79990000007', 'manager'),
-('user8@example.com',  true, 'User Eight', '+79990000008', 'admin'),
-('user9@example.com',  true, 'User Nine',  '+79990000009', 'customer'),
-('user10@example.com', true, 'User Ten',   '+79990000010', 'manager')
+-- пароль для всех пользователей: "password" (bcrypt)
+INSERT INTO users (email, is_active, full_name, phone, role, hashed_password) VALUES
+('user1@example.com',  true, 'User One',   '+79990000001', 'customer', '$2b$12$RwN8/Dpz9YqpRL4Ixqbxo.4HKH/MaIB3gFhlpRViS.BxI6Aye3DmO'),
+('user2@example.com',  true, 'User Two',   '+79990000002', 'manager',  '$2b$12$RwN8/Dpz9YqpRL4Ixqbxo.4HKH/MaIB3gFhlpRViS.BxI6Aye3DmO'),
+('user3@example.com',  true, 'User Three', '+79990000003', 'admin',    '$2b$12$RwN8/Dpz9YqpRL4Ixqbxo.4HKH/MaIB3gFhlpRViS.BxI6Aye3DmO'),
+('user4@example.com',  true, 'User Four',  '+79990000004', 'customer', '$2b$12$RwN8/Dpz9YqpRL4Ixqbxo.4HKH/MaIB3gFhlpRViS.BxI6Aye3DmO'),
+('user5@example.com',  true, 'User Five',  '+79990000005', 'manager',  '$2b$12$RwN8/Dpz9YqpRL4Ixqbxo.4HKH/MaIB3gFhlpRViS.BxI6Aye3DmO'),
+('user6@example.com',  true, 'User Six',   '+79990000006', 'customer', '$2b$12$RwN8/Dpz9YqpRL4Ixqbxo.4HKH/MaIB3gFhlpRViS.BxI6Aye3DmO'),
+('user7@example.com',  true, 'User Seven', '+79990000007', 'manager',  '$2b$12$RwN8/Dpz9YqpRL4Ixqbxo.4HKH/MaIB3gFhlpRViS.BxI6Aye3DmO'),
+('user8@example.com',  true, 'User Eight', '+79990000008', 'admin',    '$2b$12$RwN8/Dpz9YqpRL4Ixqbxo.4HKH/MaIB3gFhlpRViS.BxI6Aye3DmO'),
+('user9@example.com',  true, 'User Nine',  '+79990000009', 'customer', '$2b$12$RwN8/Dpz9YqpRL4Ixqbxo.4HKH/MaIB3gFhlpRViS.BxI6Aye3DmO'),
+('user10@example.com', true, 'User Ten',   '+79990000010', 'manager',  '$2b$12$RwN8/Dpz9YqpRL4Ixqbxo.4HKH/MaIB3gFhlpRViS.BxI6Aye3DmO')
 ON CONFLICT (email) DO NOTHING;
 
 -- cars
