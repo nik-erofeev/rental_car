@@ -58,3 +58,9 @@ class UserCreateDbAuth(BaseModel):
 
 class UserFilterEmail(BaseModel):
     email: str
+
+
+class UserSendKafka(BaseModel):
+    email: str
+    full_name: str
+    phone: str

@@ -6,6 +6,15 @@ from pydantic_core import MultiHostUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+class Config(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file_encoding="utf-8",
+        env_ignore_empty=True,
+        extra="ignore",
+        env_file=find_dotenv(".env"),
+    )
+
+
 @unique
 class Environments(StrEnum):
     local = "local"
@@ -15,12 +24,13 @@ class Environments(StrEnum):
     test = "test"
 
 
-class DbConfig(BaseModel):
-    user: str = ""
-    password: str = ""
-    host: str = ""
-    port: int = 5432
-    name: str = ""
+class DbConfig(Config):
+    model_config = SettingsConfigDict(env_prefix="DB__")
+    user: str  # = ""
+    password: str  # = ""
+    host: str  # = ""
+    port: int  # = 5432
+    name: str  # = ""
 
     max_size: int = 1
     echo: bool = True
@@ -49,7 +59,14 @@ class Api(BaseModel):
     v1: str = "/v1"
 
 
-class AppConfig(BaseSettings):
+class FaststreamConfig(Config):
+    kafka_url: str  # = "kafka:9092" or "localhost:29092"
+    subject: str  # = "user-register"
+
+    model_config = SettingsConfigDict(env_prefix="FS__")
+
+
+class AppConfig(Config):
     sentry_dsn: HttpUrl | None = None
     use_color: bool = False  # true = цветной вывод в консоль; false = обычная консоль   # noqa: E501
     app_host: str
@@ -67,14 +84,7 @@ class AppConfig(BaseSettings):
     secret_key: str = "change-me"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
-
-    model_config = SettingsConfigDict(
-        env_nested_delimiter="__",
-        env_file_encoding="utf-8",
-        env_ignore_empty=True,
-        extra="ignore",
-        env_file=find_dotenv(".env"),
-    )
+    faststream: FaststreamConfig = FaststreamConfig()  # type: ignore
 
 
 APP_CONFIG = AppConfig()  # type: ignore

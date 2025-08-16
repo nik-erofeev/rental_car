@@ -18,7 +18,9 @@ from app.api.auth.schemas import (
     Token,
     UserCreateDbAuth,
     UserFilterEmail,
+    UserSendKafka,
 )
+from app.core.brokers import user_registerer
 from app.core.settings import APP_CONFIG
 from app.dao.users import UsersDAO
 from app.db import get_session_without_commit
@@ -79,6 +81,26 @@ async def register_user(
     # Обновим значения по умолчанию сервера (created_at и т.п.)
     await session.refresh(user)
     logger.info("[users] Пользователь создан email=%s", user.email)
+
+    # отправляем в кафку (например для рассылки - в subscriber какая-то логика )
+    try:
+        user_send_kafka_data = UserSendKafka(email=user.email, full_name=data.full_name, phone=data.phone)
+        # await broker.publish(
+        #     subject=CONFIG.faststream.subject,
+        #     message=user_create.username,
+        # )
+        await user_registerer.publish(message=user_send_kafka_data)
+        logger.info(
+            f"✅ Сообщение о регистрации отправлено в Kafka.\n"
+            f"   topic:     {APP_CONFIG.faststream.subject}\n"
+            f"   full_name: {data.full_name}\n"
+            f"   email:     {user.email}\n"
+            f"   phone:     {data.phone}",
+        )
+    except Exception as e:
+        logger.error(f"❌ Ошибка при отправке сообщения в kafka: {e}")
+        raise
+
     return AuthUserRead.model_validate(user)
 
 

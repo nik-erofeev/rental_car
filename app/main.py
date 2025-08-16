@@ -10,6 +10,8 @@ if APP_CONFIG.sentry_dsn:
 app = create_app(APP_CONFIG)
 
 
+# todo: поправить ошибку - вынести ошибку при отправке в кавку
+# todo: разобраться с дублирование логов в консоль
 if __name__ == "__main__":
     # что бы работала остановка: cmd+c. Запускать :
     # uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

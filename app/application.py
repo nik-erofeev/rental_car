@@ -22,6 +22,7 @@ from app.api.orders.routers import router as orders_router
 from app.api.payments.routers import router as payments_router
 from app.api.reviews.routers import router as reviews_router
 from app.api.users.routers import router as users_router
+from app.core.brokers import broker
 from app.core.logger_config import configure_logging
 from app.core.settings import APP_CONFIG, AppConfig
 from app.metrics import setup_fastapi_metrics
@@ -57,19 +58,54 @@ def _init_routes(app: FastAPI) -> None:
 async def lifespan(app: FastAPI) -> AsyncGenerator[dict, None]:
     """Управление жизненным циклом приложения."""
     logger.info("🚀 Запуск FastAPI приложения...")
-    app.state.database_pool = create_async_engine(
-        str(APP_CONFIG.db.sqlalchemy_db_uri),
-        echo=APP_CONFIG.db.echo,
-    )
-    app.state.session_maker = async_sessionmaker(
-        app.state.database_pool,
-        class_=AsyncSession,
-        expire_on_commit=False,
-    )
-    yield {}
-    logger.info("🛑 Завершение работы приложения...")
-    await app.state.database_pool.dispose()
-    logger.info("✅ Приложение остановлено.")
+
+    # Initialize database connection pool
+    try:
+        app.state.database_pool = create_async_engine(
+            str(APP_CONFIG.db.sqlalchemy_db_uri),
+            echo=APP_CONFIG.db.echo,
+        )
+        app.state.session_maker = async_sessionmaker(
+            app.state.database_pool,
+            class_=AsyncSession,
+            expire_on_commit=False,
+        )
+        logger.info("✅ Database connection pool initialized successfully")
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize database connection pool: {e}")
+        raise
+
+    # Initialize Kafka broker
+    try:
+        await broker.start()
+        logger.info("✅ Подключение к Kafka брокеру успешно установлено")
+        # Принудительно подключаемся к Kafka
+        # logger.info("🔗 Принудительно подключаемся к Kafka...")
+        # await broker.connect()
+
+    except Exception as e:
+        logger.error(f"❌ Ошибка запуска брокера: {e}")
+        raise
+
+    try:
+        yield {}  # todo: Приложение работает
+    finally:
+        logger.info("🛑 Завершение работы приложения...")
+
+        # Close database connection pool
+        try:
+            await app.state.database_pool.dispose()
+            logger.info("✅ Database connection pool closed successfully")
+        except Exception as e:
+            logger.error(f"❌ Failed to close database connection pool: {e}")
+
+        # Stop Kafka broker
+        try:
+            await broker.stop()
+            logger.info("✅ Kafka брокер успешно остановлен")
+        except Exception as e:
+            logger.error(f"❌ Ошибка остановки брокера: {e}")
+        logger.info("✅ Приложение остановлено.")
 
 
 def create_app(config: AppConfig) -> FastAPI:
