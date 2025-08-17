@@ -141,7 +141,7 @@ docker-compose logs -f fs-broker
    ```bash
    # Проверить статус Kafka
    docker-compose ps kafka
-   
+
    # Перезапустить Kafka
    docker-compose restart kafka
    ```
@@ -150,7 +150,7 @@ docker-compose logs -f fs-broker
    ```bash
    # Проверить, что использует порт
    lsof -i :8081
-   
+
    # Остановить конфликтующий сервис
    docker-compose stop fs-docs
    ```

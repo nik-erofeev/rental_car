@@ -43,6 +43,7 @@ cp .env_example .env
 
 # log
 USE_COLOR=true
+ENABLE_HTTP_LOGS=true
 
 # Приложение
 APP_HOST=0.0.0.0
@@ -85,6 +86,23 @@ docker-compose up --build
 ```
 - Backend: `http://localhost:8000`
 - PostgreSQL публикуется на `15432`
+
+### Настройки логирования
+
+#### Переменные окружения
+- `USE_COLOR=true/false` - цветной вывод в консоли
+- `ENABLE_HTTP_LOGS=true/false` - логи HTTP запросов
+
+#### Особенности
+- **Цветной вывод**: Работает только в консоли, JSON логи остаются чистыми
+- **Без дублирования**: Каждый лог выводится только один раз
+- **JSON логи**: Автоматически отправляются в Elastic для Grafana
+- **HTTP логи**: Можно отключить для уменьшения шума
+- **Разделение потоков**: Консоль (stdout) и Elastic (stderr) разделены
+
+#### Документация
+- [Исправление дублирования логов](LOGGING_FIX.md)
+- [Тестирование логирования](TEST_LOGGING.md)
 
 ### Логи и мониторинг (Elasticsearch + Kibana + Grafana dashboard)
 - После запуска `docker-compose` поднимутся `elasticsearch`, `kibana` и `filebeat`.

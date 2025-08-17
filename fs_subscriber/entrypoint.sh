@@ -9,13 +9,13 @@ if [ "$1" = "broker" ]; then
     echo "📡 Брокер будет слушать сообщения Kafka..."
     echo "🔄 Включен hot-reload для разработки..."
     exec faststream run fs_subscriber.app:app --reload
-    
+
 elif [ "$1" = "docs" ]; then
     echo "📚 Запуск Swagger документации..."
     echo "🌐 Документация будет доступна на порту 8081"
     echo "🔗 Откройте: http://localhost:8081"
     exec faststream docs serve fs_subscriber.app:app --port 8081 --host 0.0.0.0
-    
+
 else
     echo "❌ Неизвестная команда: $1"
     echo ""

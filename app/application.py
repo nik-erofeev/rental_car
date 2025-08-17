@@ -28,7 +28,11 @@ from app.core.settings import APP_CONFIG, AppConfig
 from app.metrics import setup_fastapi_metrics
 
 # Настройка логирования
-configure_logging(use_color=APP_CONFIG.use_color)
+# JSON логи включены для Grafana, но без дублирования
+configure_logging(
+    use_color=APP_CONFIG.use_color,
+    enable_http_logs=APP_CONFIG.enable_http_logs,
+)
 logger = logging.getLogger(__name__)
 
 

@@ -68,7 +68,11 @@ class FaststreamConfig(Config):
 
 class AppConfig(Config):
     sentry_dsn: HttpUrl | None = None
-    use_color: bool = False  # true = цветной вывод в консоль; false = обычная консоль   # noqa: E501
+    # true = цветной вывод в консоль; false = обычная консоль
+    use_color: bool = False
+    # true = логи HTTP запросов
+    # false = без HTTP логов
+    enable_http_logs: bool = True
     app_host: str
     app_port: int
     workers: int
