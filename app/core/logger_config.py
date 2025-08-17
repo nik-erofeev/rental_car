@@ -1,19 +1,9 @@
-import importlib
 import logging
 import sys
 
 from colorama import Fore, Style
 
 DEFAULT_LOG_FORMAT = "[%(asctime)s.%(msecs)03d] %(funcName)20s %(module)s:%(lineno)d %(levelname)-8s - %(message)s"  # noqa: E501 : ignore
-# DEFAULT_LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-
-#
-# def configure_logging(level: int = logging.INFO) -> None:
-#     logging.basicConfig(
-#         level=level,
-#         datefmt="%Y-%m-%d %H:%M:%S",
-#         format=DEFAULT_LOG_FORMAT,
-#     )
 
 
 class ColoredFormatter(logging.Formatter):
@@ -39,6 +29,26 @@ class ColoredFormatter(logging.Formatter):
         return super().format(record)
 
 
+def _setup_logger(
+    name: str,
+    level: int,
+    formatter: logging.Formatter,
+    stream=sys.stdout,
+    propagate: bool = False,
+) -> logging.Logger:
+    """Вспомогательная функция для настройки логгера."""
+    logger = logging.getLogger(name)
+    logger.handlers.clear()
+    logger.setLevel(level)
+    logger.propagate = propagate
+    
+    handler = logging.StreamHandler(stream)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    
+    return logger
+
+
 def configure_logging(
     use_color: bool,
     level: int = logging.INFO,
@@ -47,133 +57,66 @@ def configure_logging(
     """
     Настройка логирования с цветным консольным выводом и JSON-логами для Elastic.
 
-    В консоль всегда выводятся логи в текстовом формате:
-        - с цветом, если use_color=True,
-        - без цвета, если use_color=False.
-
-    JSON-логи отправляются в отдельный файл для Elastic (через Filebeat).
-
-    :param use_color: Включить цветной вывод в консоль (True) или нет (False).
-    :param level: Уровень логирования (по умолчанию INFO).
-    :param enable_http_logs: Включить логи HTTP запросов (по умолчанию True).
-
-    Примеры использования:
-        configure_logging(use_color=True)   # Цветная консоль + JSON для Elastic
-        configure_logging(use_color=False)  # Обычная консоль + JSON для Elastic
+    :param use_color: Включить цветной вывод в консоль
+    :param level: Уровень логирования
+    :param enable_http_logs: Включить логи HTTP запросов
     """
 
-    # Настраиваем корневой логгер ТОЛЬКО для консоли
+    # Очищаем корневой логгер
     root_logger = logging.getLogger()
     root_logger.setLevel(level)
-
     if root_logger.hasHandlers():
         root_logger.handlers.clear()
 
-    # Консольный вывод (цветной или обычный)
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(
-        ColoredFormatter(
-            DEFAULT_LOG_FORMAT,
-            use_color=use_color,
-        ),
-    )
-    root_logger.addHandler(console_handler)
+    # Создаем форматтеры
+    console_formatter = ColoredFormatter(DEFAULT_LOG_FORMAT, use_color=use_color)
+    
+    # Настраиваем корневой логгер (консоль)
+    root_handler = logging.StreamHandler(sys.stdout)
+    root_handler.setFormatter(console_formatter)
+    root_logger.addHandler(root_handler)
 
-    # Создаем ОТДЕЛЬНЫЙ логгер для JSON логов в Elastic
-    # Этот логгер НЕ будет дублировать логи в консоль
-    json_logger = logging.getLogger("elastic_logger")
-    json_logger.setLevel(level)
-    json_logger.propagate = False  # Отключаем пропагацию в корневой логгер
-
+    # Настраиваем JSON логгер для Elastic (stderr)
     try:
-        jsonlogger_module = importlib.import_module("pythonjsonlogger.jsonlogger")
-        # JSON логи идут в stderr (отдельно от консоли)
-        json_handler = logging.StreamHandler(sys.stderr)
-        json_formatter = jsonlogger_module.JsonFormatter(
+        from pythonjsonlogger import json
+        
+        json_formatter = json.JsonFormatter(
             fmt="%(asctime)s %(name)s %(levelname)s %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
         )
-        json_handler.setFormatter(json_formatter)
-        json_logger.addHandler(json_handler)
-    except Exception as e:
-        logging.getLogger(__name__).error(
-            f"Ошибка при настройке JSON логгера для Elastic: {e}",
+        _setup_logger(
+            "elastic_logger", level, json_formatter, sys.stderr, propagate=False
         )
+        
+    except ImportError:
+        logging.getLogger(__name__).error("python-json-logger не установлен")
 
-    # Настраиваем Uvicorn логгер, чтобы избежать дублирования
-    uvicorn_logger = logging.getLogger("uvicorn")
-    uvicorn_logger.handlers.clear()
-    uvicorn_logger.propagate = False  # Отключаем пропагацию в корневой логгер
+    # Настраиваем все остальные логгеры
+    loggers_to_setup = [
+        ("uvicorn", True),
+        ("fastapi", True),
+        ("uvicorn.access", enable_http_logs),
+        ("uvicorn.error", True),
+    ]
 
-    # Добавляем наш обработчик для Uvicorn
-    uvicorn_handler = logging.StreamHandler(sys.stdout)
-    uvicorn_handler.setFormatter(
-        ColoredFormatter(
-            DEFAULT_LOG_FORMAT,
-            use_color=use_color,
-        ),
-    )
-    uvicorn_logger.addHandler(uvicorn_handler)
-
-    # Настраиваем FastAPI логгер
-    fastapi_logger = logging.getLogger("fastapi")
-    fastapi_logger.handlers.clear()
-    fastapi_logger.propagate = False
-
-    fastapi_handler = logging.StreamHandler(sys.stdout)
-    fastapi_handler.setFormatter(
-        ColoredFormatter(
-            DEFAULT_LOG_FORMAT,
-            use_color=use_color,
-        ),
-    )
-    fastapi_logger.addHandler(fastapi_handler)
-
-    # Настраиваем HTTP логгер (для запросов) - опционально
-    if enable_http_logs:
-        http_logger = logging.getLogger("uvicorn.access")
-        http_logger.handlers.clear()
-        http_logger.propagate = False
-
-        http_handler = logging.StreamHandler(sys.stdout)
-        http_handler.setFormatter(
-            ColoredFormatter(
-                DEFAULT_LOG_FORMAT,
-                use_color=use_color,
-            ),
-        )
-        http_logger.addHandler(http_handler)
-    else:
-        # Отключаем HTTP логи полностью
-        http_logger = logging.getLogger("uvicorn.access")
-        http_logger.disabled = True
-        http_logger.propagate = False
-
-    # Настраиваем httptools логгер (для HTTP запросов)
-    httptools_logger = logging.getLogger("uvicorn.error")
-    httptools_logger.handlers.clear()
-    httptools_logger.propagate = False
-
-    httptools_handler = logging.StreamHandler(sys.stdout)
-    httptools_handler.setFormatter(
-        ColoredFormatter(
-            DEFAULT_LOG_FORMAT,
-            use_color=use_color,
-        ),
-    )
-    httptools_logger.addHandler(httptools_handler)
+    for logger_name, should_enable in loggers_to_setup:
+        if should_enable:
+            _setup_logger(
+                logger_name, level, console_formatter, sys.stdout, propagate=False
+            )
+        else:
+            logger = logging.getLogger(logger_name)
+            logger.disabled = True
+            logger.propagate = False
 
 
 def get_elastic_logger() -> logging.Logger:
-    """
-    Возвращает логгер для отправки логов в Elastic.
-    Используйте этот логгер для логирования, которое должно попасть в Grafana.
-    """
+    """Возвращает логгер для отправки логов в Elastic."""
     return logging.getLogger("elastic_logger")
 
 
 def disable_http_logs() -> None:
-    """Отключает логи HTTP запросов (uvicorn.access)."""
-    http_logger = logging.getLogger("uvicorn.access")
-    http_logger.disabled = True
-    http_logger.propagate = False
+    """Отключает логи HTTP запросов."""
+    logger = logging.getLogger("uvicorn.access")
+    logger.disabled = True
+    logger.propagate = False
