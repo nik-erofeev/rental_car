@@ -1,3 +1,9 @@
+.PHONY: help kube_run kube_del fs-broker fs-docs fs-logs fs-status fs-restart
+
+help: ## Показать справку
+	@echo "Доступные команды:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
 # Применить все манифесты
 kube_run:
 	kubectl apply -f k8s/configmap.yaml
@@ -27,3 +33,19 @@ kube_del:
 #kdelf k8s/deployment.yaml
 #kdelf k8s/service.yaml
 #kdelf k8s/hpa.yaml
+
+# FastStream Subscriber команды
+fs-broker: ## Запустить только FastStream брокер
+	docker-compose up -d fs-broker
+
+fs-docs: ## Запустить только FastStream Swagger документацию
+	docker-compose up -d fs-docs
+
+fs-logs: ## Показать логи FastStream сервисов
+	docker-compose logs -f fs-broker fs-docs
+
+fs-status: ## Показать статус FastStream контейнеров
+	docker-compose ps fs-broker fs-docs
+
+fs-restart: ## Перезапустить FastStream сервисы
+	docker-compose restart fs-broker fs-docs
