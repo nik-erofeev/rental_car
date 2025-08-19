@@ -214,7 +214,7 @@ services:
       - ./docker/elastic/kibana_setup.sh:/app/docker/elastic/kibana_setup.sh:ro
     environment:
       - KIBANA_URL=http://kibana:5601
-      - DATA_VIEW_NAME=rental_car_api_beckend
+      - DATA_VIEW_NAME=rental_car_api_backend
       - DATA_VIEW_TITLE=filebeat-*
       - TIME_FIELD=@timestamp
     networks:

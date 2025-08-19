@@ -100,22 +100,19 @@ docker-compose up --build
 - **HTTP логи**: Можно отключить для уменьшения шума
 - **Разделение потоков**: Консоль (stdout) и Elastic (stderr) разделены
 
-#### Документация
-- [Исправление дублирования логов](LOGGING_FIX.md)
-- [Тестирование логирования](TEST_LOGGING.md)
 
 ### Логи и мониторинг (Elasticsearch + Kibana + Grafana dashboard)
 - После запуска `docker-compose` поднимутся `elasticsearch`, `kibana` и `filebeat`.
 - Kibana: откройте http://localhost:5601.
 - Grafana с дашбордами http://localhost:3000
 - Data View создаётся автоматически скриптом `docker/elastic/kibana_setup.sh`:
-  - **Имя**: `rental_car_api_beckend`
+  - **Имя**: `rental_car_api_backend`
   - **Шаблон индекса**: `filebeat-*`
   - **Поле времени**: `@timestamp`
 
 Шаги для просмотра логов:
 1. Зайдите в Kibana → Discover.
-2. Выберите Data View `rental_car_api_beckend`.
+2. Выберите Data View `rental_car_api_backend`.
 3. В блоке Selected fields добавьте поля:
    - `container.name`
    - `log.level`
@@ -159,7 +156,7 @@ make kube_run
 kubectl get pods,deploy,svc,hpa
 ```
 
-4) Пробросить порт сервиса на локальную машину(ЧТОЮЫ РАБОАТЛА API):
+4) Пробросить порт сервиса на локальную машину (для доступа к API):
 ```bash
 kubectl port-forward service/rental-app-api 8000:80
 
@@ -169,7 +166,7 @@ kubectl port-forward service/rental-app-api 8000:80
 ```
 
 Примечания:
-- В `k8s/deployment.yml` настроены readiness/liveness пробы (`/docs`, `/ping`).
+- В `k8s/deployment.yaml` настроены readiness/liveness пробы (`/docs`, `/ping`).
 - HPA требует установленный metrics-server.
 - Для приватного реестра используйте `imagePullSecrets`.
 
@@ -215,5 +212,3 @@ alembic upgrade head
 alembic downgrade -1
 ```
 
-### Примеры запросов
-- См. `example_crud_api.bash` — готовые curl-команды для CRUD, фильтров и `details`.

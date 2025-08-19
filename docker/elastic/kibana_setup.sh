@@ -2,12 +2,12 @@
 set -e
 
 # Скрипт создаёт Data View в Kibana при старте окружения
-# Имя Data View: rental_car_api_beckend
+# Имя Data View: rental_car_api_backend
 # Шаблон индекса: filebeat-*
 # Поле времени: @timestamp
 
 KIBANA_URL=${KIBANA_URL:-http://kibana:5601}
-DATA_VIEW_NAME=${DATA_VIEW_NAME:-rental_car_api_beckend}
+DATA_VIEW_NAME=${DATA_VIEW_NAME:-rental_car_api_backend}
 DATA_VIEW_TITLE=${DATA_VIEW_TITLE:-filebeat-*}
 TIME_FIELD=${TIME_FIELD:-@timestamp}
 
