@@ -12,4 +12,9 @@ scrape_configs:
     static_configs:
       - targets: ["postgres_exporter:9187"]
 
+  - job_name: "fs_subscriber"
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["fs-broker:8000"]
+
 

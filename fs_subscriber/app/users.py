@@ -1,18 +1,17 @@
-import logging
-
+from faststream import Logger
 from faststream.kafka import KafkaRouter
 
-from fs_subscriber.settings import APP_CONFIG
-from fs_subscriber.shemas import UserSendKafka
+from fs_subscriber.app.settings import APP_CONFIG
+from fs_subscriber.app.shemas import UserSendKafka
 
 roter = KafkaRouter()
 
 
-logger = logging.getLogger(__name__)
-
-
 @roter.subscriber(APP_CONFIG.faststream.subject)
-async def send_example_email(user: UserSendKafka) -> None:
+async def send_example_email(
+    user: UserSendKafka,
+    logger: Logger,
+) -> None:
     # todo: документация подтягивается в сваггер docs async api
     """
     Обработка регистрации пользователя:
@@ -20,7 +19,7 @@ async def send_example_email(user: UserSendKafka) -> None:
       — ведение журнала.
     """
 
-    logging.info(
+    logger.info(
         "Sending example email to %s",
         user.email,
     )

@@ -40,6 +40,7 @@ services:
       timeout: 5s
       retries: 3
 
+  # для логов grafana-dashboard
   loki:
     container_name: ${DOCKER_NAME}_loki
     image: grafana/loki:2.8.2
@@ -52,6 +53,7 @@ services:
     networks:
       - custom
 
+  # для loki
   promtail:
     container_name: ${DOCKER_NAME}_promtail
     image: grafana/promtail:2.8.2
@@ -90,6 +92,7 @@ services:
     networks:
       - custom
 
+  # импорт dashboards (postgres или fastapi)
   grafana_import_16110:
     image: alpine:3.19
     container_name: ${DOCKER_NAME}_grafana_import_16110
@@ -105,6 +108,7 @@ services:
     networks:
       - custom
 
+  # импорт dashboards (postgres или fastapi)
   grafana_import_13115:
     image: alpine:3.19
     container_name: ${DOCKER_NAME}_grafana_import_13115
@@ -120,6 +124,24 @@ services:
     entrypoint: ["sh", "/scripts/import-local.sh"]
     networks:
       - custom
+
+  # импорт dashboards (faststream)
+  grafana_import_22130:
+    image: alpine:3.19
+    container_name: ${DOCKER_NAME}_grafana_import_22130
+    depends_on:
+      - grafana
+    environment:
+      - GRAFANA_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GRAFANA_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - DASHBOARD_PATH=/dashboards/22130_rev3.json
+    volumes:
+      - ./docker/grafana/22130_rev3.json:/dashboards/22130_rev3.json:ro
+      - ./docker/grafana/import-local.sh:/scripts/import-local.sh:ro
+    entrypoint: ["sh", "/scripts/import-local.sh"]
+    networks:
+      - custom
+
 
   prometheus:
     container_name: ${DOCKER_NAME}_prometheus
@@ -256,6 +278,11 @@ services:
       networks:
         - custom
       restart: unless-stopped
+      healthcheck:
+        test: ["CMD", "bash", "-lc", "</dev/tcp/localhost/9092"]
+        interval: 10s
+        timeout: 5s
+        retries: 12
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -291,12 +318,15 @@ services:
     networks:
       - custom
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+    ports:
+      - "8001:8000"  # внешние /health и /metrics для fs_subscriber
 
   # docs по свагеру broker's
   fs-docs:

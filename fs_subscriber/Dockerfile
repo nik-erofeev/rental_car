@@ -22,7 +22,7 @@ RUN pip install uv
 RUN uv pip install --system -e .
 
 
-COPY fs_subscriber/ ./fs_subscriber/
+COPY fs_subscriber/app ./fs_subscriber/app
 
 
 COPY fs_subscriber/entrypoint.sh /app/entrypoint.sh

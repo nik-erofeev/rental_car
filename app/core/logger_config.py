@@ -41,11 +41,11 @@ def _setup_logger(
     logger.handlers.clear()
     logger.setLevel(level)
     logger.propagate = propagate
-    
+
     handler = logging.StreamHandler(stream)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    
+
     return logger
 
 
@@ -70,7 +70,7 @@ def configure_logging(
 
     # Создаем форматтеры
     console_formatter = ColoredFormatter(DEFAULT_LOG_FORMAT, use_color=use_color)
-    
+
     # Настраиваем корневой логгер (консоль)
     root_handler = logging.StreamHandler(sys.stdout)
     root_handler.setFormatter(console_formatter)
@@ -79,15 +79,19 @@ def configure_logging(
     # Настраиваем JSON логгер для Elastic (stderr)
     try:
         from pythonjsonlogger import json
-        
+
         json_formatter = json.JsonFormatter(
             fmt="%(asctime)s %(name)s %(levelname)s %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S",
         )
         _setup_logger(
-            "elastic_logger", level, json_formatter, sys.stderr, propagate=False
+            "elastic_logger",
+            level,
+            json_formatter,
+            sys.stderr,
+            propagate=False,
         )
-        
+
     except ImportError:
         logging.getLogger(__name__).error("python-json-logger не установлен")
 
@@ -102,7 +106,11 @@ def configure_logging(
     for logger_name, should_enable in loggers_to_setup:
         if should_enable:
             _setup_logger(
-                logger_name, level, console_formatter, sys.stdout, propagate=False
+                logger_name,
+                level,
+                console_formatter,
+                sys.stdout,
+                propagate=False,
             )
         else:
             logger = logging.getLogger(logger_name)
